@@ -1,7 +1,7 @@
 module LJforce
         implicit none 
         private
-        public LJ
+        public :: LJ
 
 contains
         real(8) function LJ (r,sigma)

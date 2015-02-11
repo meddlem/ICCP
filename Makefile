@@ -12,8 +12,10 @@ PROG = main #program name
 
 #required objects: 
 OBJS =
-OBJS += maxwell.o
 OBJS += LJ.o
+OBJS += maxwell.o
+OBJS += Incs.o
+OBJS += Inits.o
 OBJS += main.o
 
 all: $(PROG)
