@@ -2,6 +2,9 @@ FC = gfortran
 FFLAGS = -Wall -march=native -O5 #compiler flags
 LDFLAGS = #link flags
 
+FFLAGS += $(shell pkg-config --cflags plplotd-f95)
+LIBS += $(shell pkg-config --libs plplotd-f95)
+
 COMPILE = $(FC) $(FFLAGS)
 LINK = $(FC) $(LDFLAGS)
 

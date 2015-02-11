@@ -4,9 +4,9 @@ module maxwell
         public MB
 
 contains 
-        real function MB (m,beta)
-                real, intent(in) :: m, beta
-                real :: u, v, s, std 
+        real(8) function MB (m,beta)
+                real(8), intent(in) :: m, beta
+                real(8) :: u, v, s, std 
                 integer :: i = 0
                 s = 1
                 std = sqrt(1/(m*beta)) !define std of velocity distribution
