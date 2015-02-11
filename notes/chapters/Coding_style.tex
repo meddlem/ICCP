@@ -1,0 +1,61 @@
+\chapter{Coding style}
+\label{chap:Coding style}
+
+\begin{quote}\small
+  \emph{``Consistently separating words by spaces became a general custom about the tenth century A.D., and lasted until about 1957, when FORTRAN abandoned the practice.''} \\ \hspace*{\fill}---Sun FORTRAN Reference Manual
+\end{quote}
+
+\begin{quote}\small
+  \emph{``Simplicity is prerequisite for reliability.''} \\ \hspace*{\fill}---Edsger Dijkstra
+\end{quote}
+A major part of writing clean code is following a sensible coding style.
+Although style is subjective and a matter of taste, consistency is not.
+\textbf{Which style you pick is not as important as sticking to it.}
+However, certain styles are objectively better than others.
+While we won't force a particular style, you will make it a lot easier for your instructors to read your code if you follow these guidelines, and that's always a good thing.
+Remember: you will be spending a lot more time reading your code than writing it; keep it clean.
+\begin{itemize}
+  \item\textbf{Line width}---Limit the line width of your source to 80 characters.
+    This has been standard practice for decades, and vastly improves both readability and the ability to cleanly print your code.
+    If you do need more than 80 characters on a line, use the Fortran continuation character `\texttt{\&}'.
+  \item\textbf{Indentation}---Indent every block, be it  a \keyword{program}, \keyword{module}, \linebreak \keyword{subroutine}, \keyword{function}, \keyword{do} or \keyword{if} block by 2 or 4 spaces.
+    \emph{Don't use tabs!} Code that looks properly aligned on your machine may look horrible on another because of a different tab setting.
+    Proper indentation makes it clear where control structures begin and end, and is a major boon to readability.
+    If the indentation puts you over the 80 character limit, that's an indication that you may need to refactor your code intro smaller subroutines.
+    Four levels of indentation should generally be the maximum.
+  \item\textbf{Spaces}---Put spaces around binary operators, including \texttt{::}, and after keywords and commas, not after unary operators, function names or around parentheses.
+\begin{lstlisting}[caption=,nolol,float=]
+  real(8) :: x, y
+  x = func1()
+  if ((x < 0) .or. (x > 1)) then
+      y = func2(-2, 2*x + 3)
+  end if
+\end{lstlisting}
+  \item\textbf{Naming}---Identifiers in Fortran can't contain spaces.
+    Use \linebreak \texttt{CamelCase} to separate words in program and module names, and \linebreak \texttt{lower\_case\_with\_underscores} for function and variable names.
+    Names should be descriptive, but they don't have to be overly long.
+    You can use \texttt{calc\_deriv} instead of \texttt{calculate\_derivative}, but naming your function \texttt{cd} is a shooting offense.
+    Unfortunately, until the appearance of Fortran 90, only the first six characters of an identifier were significant, leading to such beautifully transparent function names as \texttt{DSYTRF}\footnote{DSYTRF computes the factorization of a real symmetric matrix using the Bunch-Kaufman diagonal pivoting method, in case you wondered.} in legacy codes like \indexentry{LAPACK}.
+    They could get away with it because it was the eighties; you can't.
+    One exception to this rule is using short identifiers like \texttt{i}, \texttt{j} and \texttt{k} as loop counters, or \texttt{x} and \texttt{y} as arguments to mathematical functions.
+    However, these should always be local variables or function arguments, never global identifiers.
+  \item\textbf{Functions and subroutines}---Functions and subroutines should follow the Unix philosophy: do one thing and do it well.
+    Split your program into small self-contained subunits.
+    This makes it a lot easier to understand your code, and to modify it afterwards.
+    If a function does not fit in its entirety on a single screen, it is too long---split it up.
+    Don't worry about the overhead of calling a function.
+    If you use optimization flags like \texttt{-O3}, the compiler will try to inline them anyway.
+  \item\textbf{Modules}---Separate your program into logical units.
+    Combine related functions and subroutines into modules\footnote{You may also find it convenient to put all physical parameters (number of particles, $\pi$, $c$, $k_B$, etc.) into their own module, even if they're just constant numbers. You can then ``load'' the parameters into your subroutines with the \keyword{use} statement instead of having absurdly long lists of arguments, or worse, \Biohazard\ global variables \Biohazard.\index{biohazard|see {global variables}}\index{global variables}}
+    For example, a single module with function integrators, or ODE solvers. 
+    If you use the object-oriented features of Fortran, it is also good practice to create separate modules for classes, \eg, a sparse-matrix object.
+  \item\textbf{Comments}---Comments are kind of a double-edged sword.
+    If used improperly or left unmaintained, they actually hurt readability.
+    The general idea is to avoid explaining \emph{how} your code works and instead just mention \emph{what} it does.
+    The how should be evident from the code itself.
+    \emph{``Good code is its own best documentation.''} If you follow the other guidelines regarding naming and keeping functions small, you can generally suffice with nothing more than a small comment at the beginning of every function or subroutine.
+\end{itemize}
+One final point, not of style, but important nonetheless: start every program and module with \keyword{implicit none}\marginnote{The \texttt{-fimplicit-none}\index{compiler flags!-fimplicit-none} compiler flag will also turn off implicit typing globally.}\index{Fortran!implicit none@\keyword{implicit none}}.
+This is an unfortunate holdover from older versions of Fortran; it forces you to explicitly declare all variables, instead of allowing Fortran to infer the type from the name.
+Forgetting \keyword{implicit none} and making a typo in one of your variable names is a major source of bugs.
+\emph{Never ever omit this!}

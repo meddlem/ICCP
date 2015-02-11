@@ -1,0 +1,133 @@
+\Chapter{Getting your toes wet}{with Fortran and Linux}
+\label{chap:Getting your toes wet}
+\begin{quote}\small
+  \emph{``1957: John Backus and IBM create FORTRAN\@. There's nothing funny about IBM or FORTRAN\@. It is a syntax error to write FORTRAN while not wearing a blue tie.''} \\ \hspace*{\fill}---James Iry
+\end{quote}
+
+For this course we recommend using the GNU Fortran compiler, as it is free and of reasonably high quality.\footnote{You're welcome to use the Intel Fortran compiler, which is free on Linux, but remember to change the compiler flags, since they differ from \texttt{gfortran}.}
+Linux is the platform of choice, since it's most suited to programming and high-performance computing.\footnote{As of this writing, 476 of the \href{http://www.top500.org/list/2013/11/}{TOP500} supercomputers in the world run some form of Linux.}
+OS~X, being a Unix variant, is also an option, but installing the required packages is generally a bit more work.
+In these notes we will assume that you're using Ubuntu.\footnote{You can use Ubuntu as a native installation, run it from a flash drive, under a virtual machine, or under Windows using Wubi.
+Ask your instructor.}
+
+After booting Ubuntu, you need to install a Fortran compiler.
+Open a terminal and at the prompt (the \$) type
+\begin{lstlisting}[style=prompt, nolol]
+  $ sudo apt-get install gfortran gfortran-doc
+\end{lstlisting}
+\emph{Note that anything you type in the console is case-sensitive!}
+This command grants the package manager (\texttt{aptitude}) privileges to search for and then install the \texttt{gfortran} package and its documentation.
+You may also find it useful to install the \LaTeX\ typesetting system for writing reports.
+You can install it with another call to \texttt{apt-get}:
+\begin{lstlisting}[style=prompt, nolol, breaklines=false]
+  $ sudo apt-get install texlive # or texlive-full for a complete installation
+\end{lstlisting}
+
+Once you have \texttt{gfortran} installed, you can start writing programs.
+You will generally compile and run your programs from a terminal window (also called a \emph{console}).
+A few useful commands include:
+\begin{lstlisting}[style=prompt, nolol, linewidth=30cm]
+  $ ls           # display the contents of the current directory
+  $ ls -l        # display contents with extra details
+  $ cp file path # copy `file' to `path'
+  $ mv file path # move `file' to `path'
+  $ rm file      # remove `file'
+  $ mkdir dir    # create a new directory called `dir'
+  $ cd dir       # change current directory to `dir'
+  $ rmdir dir    # remove directory `dir' (only if it's empty)
+  $ rm -r dir    # remove directory `dir' (even if it's not empty)
+  $ man cmd      # provide documentation on `cmd'
+\end{lstlisting}
+
+For your first program, open a terminal, create a directory for ICCP files and open your first Fortran file by typing
+\marginnote[-0.5cm]{Modern shells all have a feature called
+  \emph{tab completion}\index{Tab completion}; hit the \texttt{TAB} key after you've entered part of a command and the shell will attempt to fill in the rest of the command for you.}
+\begin{lstlisting}[style=prompt, nolol, linewidth=30cm]
+  $ mkdir iccp          # create a new directory called 'iccp'
+  $ cd iccp             # move to the new directory
+  $ gedit myprog.f90    # open a text editor with the file 'myprog.f90'
+\end{lstlisting}
+The gedit text editor pops open in which you can type the program in \cref{lst:myProg}.
+You can probably guess what this program does, however, a few remarks are in order:
+\begin{itemize}
+  \item The program starts with a declaration of variables.\index{Fortran!types}
+    \texttt{\keyword{real}(8)} denotes a floating-point variable with double (8 byte) precision.
+    Similarly, \keyword{integer} denotes an integer number.\footnote{Fortran intrinsic types include \keyword{logical}, \keyword{integer}, \keyword{real}, \keyword{complex}, and \keyword{character} data. Modern Fortran also gives you the ability to define your own datatypes.}
+    Not specifying a size generally defaults to 4-byte precision.
+    \keyword{implicit none}\index{Fortran!implicit none@\keyword{implicit none}} prevents Fortran from trying to infer the type from the variable name, which is a major source of bugs---\emph{always include this!}
+  \item The attribute \keyword{parameter}\index{Fortran!parameter@\keyword{parameter}} specifies that we are declaring a constant.
+    Although Fortran is case-insensitive, it is considered good practice to always use uppercase names for constant variables.
+  \item Note the calculation of $\pi$ as \texttt{4*\keyword{atan}(1d0)}---convenient and accurate.
+  \item Single-precision (4 byte) floating-point numbers can be written as \texttt{0.1} or \texttt{1e-1} (scientific notation).
+    For double-precision numbers, use \texttt{d} instead of \texttt{e} in scientific notation, \eg, \texttt{1d-1}.
+    It is also possible to specify the precision as a suffix: \texttt{1.0\_4} for single and \texttt{1.0\_8} for double precision.
+    This also works for integers.
+  \item \texttt{\keyword{integer} :: fibonacci(N)} allocates an array of 20 integers, with the array\index{Fortran!arrays} index\footnote{Array indices can start at any integer by replacing \texttt{N} with a lower and upper bound separated with a colon. Thus, \lstinline$real :: myArray(-312:74)$ means \texttt{myArray} starts at index -312 and runs through index 74.} running from 1 to 20.
+  \item `\texttt{*}' is multiplication, `\texttt{**}' is exponentiation.
+  \item The \keyword{print} statement on line 24 contains the format code\index{Fortran!format codes} \str{"(4I6)"}.
+    This tells Fortran to print 4 records of integer type, each having a width of 6 characters (including spaces), per line. 
+    \Cref{tbl:format codes} gives the format codes for other intrinsic types.
+    \begin{margintable}
+      \begin{tabular}{ll}
+        \toprule
+        Format string & Meaning \\
+        \midrule
+        \texttt{Iw}    & integer \\
+        \texttt{Ew.d}  & real  (decimal form)\\
+        \texttt{ESw.d} & real  (scientific form)\\
+        \texttt{ENw.d} & real  (engineering form)\\
+        \texttt{Lw}    & logical \\
+        \texttt{A}     & character data\\
+        \bottomrule
+      \end{tabular}
+      \caption{\label{tbl:format codes}Format codes for intrinsic types. \texttt{w} gives the width of a record, and \texttt{d} gives the number of places to the right of the decimal.}
+    \end{margintable} 
+  \item Comments in Fortran start with `\texttt{!}' and last until the end of the line.
+  \item Dividing integers \textcolor{red}{\textbf{results in an integer}}\index{Fortran!integer division}, so \texttt{3 / 2 == 1} instead of 1.5 as you might expect.
+    Multiplying by \texttt{1d0} on line 28 forces Fortran to do a double-precision floating-point calculation.
+\end{itemize}
+Now we compile and run the program.
+Compiling means translating the Fortran source code into machine code (processor instructions).
+This can be done by simply typing
+\begin{verbatim}
+$ gfortran myprog.f90
+\end{verbatim}
+which will result in the executable file \texttt{a.out}.
+This is the default name for the output.
+You can specify a different name by compiling with
+\begin{verbatim}
+$ gfortran myprog.f90 -o myprog
+\end{verbatim}
+which results in a program with the name \texttt{myprog}.
+During compilation, the compiler may generate error messages and warnings.
+The errors must be fixed before an actual running program is produced, and it is good practice to also make sure no warnings are generated.
+
+The compilation process can be tuned by passing certain command-line arguments to the compiler.
+We recommend using always at least the following:
+\begin{verbatim}
+$ gfortran -Wall -Wextra -march=native -O3 myprog.f90 -o myprog
+\end{verbatim}
+\begin{itemize}
+  \item \texttt{-Wall}\index{compiler flags!-Wall} and \texttt{-Wextra}\index{compiler flags!-Wextra} turn on all warnings.
+    This may generate a lot of messages, but fixing them all leads to much cleaner code.
+    This can be a huge time saver; not only for you, but also for your instructors!
+    If your program doesn't behave as expected, first try to fix all warnings before asking your instructors for help.
+  \item \texttt{-march=native}\index{compiler flags!-march=native} tells the compiler to generate machine code using all available processor instructions on your machine. 
+    On modern CPUs this leads to much faster code, since \texttt{gfortran} can use vector instructions.
+    The downside is that it can result in executables that will not run on a different machine.
+  \item \texttt{-O3}\index{compiler flags!-O3} turns on all optimizations.
+    This increases the compilation time significantly, although it should still be fast enough for the programs you'll write in ICCP.
+    The run time of your program, on the other hand, will dramatically decrease.
+    The only reason not to use this flag is that it might interfere with the debugger (see below).
+  \item A possible additional optimization flag is \texttt{-ffast-math}\index{compiler flags!-ffast-math}.
+    This flag enables floating-point optimizations which might reduce accuracy or result in incorrect behavior, especially in situations such as divide-by-zero.
+    We therefore recommend not using this flag until you have verified that your program produces the correct results.
+    After that you can use it to make your program faster, but do check that it still behaves correctly.
+  \item Finally, if your code starts throwing segmentation faults (segfaults), consider using the \texttt{-fbounds-check}\index{compiler flags!-fbounds-check}\index{segmentation fault} flag.
+    Segfaults usually occur because you've run an index off the end of an array, so compiling with this flag turns on runtime bounds checking (at the expense of significantly reduced performance).
+\end{itemize}
+If the program compiled correctly, you can run it by typing \texttt{./a.out} or \texttt{./myprog}.
+Note that \texttt{./} specifies the \emph{path}, \ie, the location where to find the program.
+The dot means the current directory (similarly, \texttt{..} refers to the parent directory), and the slash separates directories and file names (like the backslash in DOS and Windows).
+
+\lstinputlisting[float=h!,label=lst:myProg]{examples/myProg.f90}

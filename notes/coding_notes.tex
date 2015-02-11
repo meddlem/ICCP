@@ -1,0 +1,151 @@
+\documentclass[nofonts, notoc, debug]{tufte-book}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{cag}
+\usepackage{float}
+%\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{listings}
+\usepackage{makeidx}
+\usepackage{marvosym}
+\usepackage{microtype}
+\usepackage{nag}
+\usepackage[all]{nowidow}
+%\usepackage{thumbs}
+\usepackage{titlepic}
+%\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+
+%\usepackage{arevmath}
+\usepackage{lmodern}
+\usepackage{bera}
+
+\usepackage{hyperref}
+\usepackage{cleveref} % Must come after hyperref
+
+%\geometry{showframe}% for debugging purposes -- displays the margins
+
+%\pagestyle{fancy}
+
+%\geometry{a4paper} % May funkify floating listings
+
+%\definecolor{TUBlue}{RGB}{61,152,222}
+%\definecolor{SpartanGreen}{RGB}{24,69,59}
+
+%\pretolerance=10000
+
+\crefname{lstlisting}{listing}{listings}
+\Crefname{lstlisting}{Listing}{Listings}
+
+\hypersetup{
+    colorlinks=true,
+    citecolor=Blue,
+    linkcolor=Blue,
+    urlcolor=Green
+}
+
+\lstset{
+  language=fortran,
+  basicstyle=\ttfamily,
+  commentstyle=\itshape\color{Blue},
+  keywordstyle=\bfseries\color{DarkRed},
+  stringstyle=\color{Magenta},
+  columns=fixed,
+  numbers=left,
+  numberstyle=\footnotesize\color{lightgray},
+  numberblanklines=true,
+  showstringspaces=false,
+  caption=\lstname,
+  firstnumber=auto,
+  frame=single,
+  rulesepcolor=\color{black},
+  gobble=2 % Allow indentation in LaTeX source for readibility
+}
+
+\lstdefinestyle{prompt}{
+  language=bash,
+  caption=,
+  commentstyle=\itshape\color{gray},
+  keywordstyle=\ttfamily,
+  stringstyle=,
+  numbers=none,
+  frame=none,
+  breaklines=false,
+}
+
+\newcommand{\keyword}[1]{\texttt{\bfseries\color{DarkRed}#1}}
+\newcommand{\str}[1]{\texttt{\color{Magenta}#1}}
+\newcommand{\Chapter}[2]{\chapter[#1]{#1\\[-1.5ex]\Large\itshape#2}} 
+
+\renewenvironment{quote}{\list{}{\leftmargin=4\parindent}\item\relax}{\endlist}
+
+\makeindex
+
+%\titlespacing*{\chapter}{0pt}{50pt}{40pt} % defaults set by tufte-latex
+\titlespacing*{\chapter}{0pt}{50pt}{10pt}  % much less floaty whitespace
+
+\title{ICCP Coding Manual}
+\author{Connor Glosser, Jenni Portman, Jos Seldenthuis, \\
+        Chris Verzijl, Erin McGarrity, and Jos Thijssen}
+  \titlepic{
+    \begin{figure}[b]
+      \centering
+      \includegraphics[width=0.33\pdfpagewidth]{figures/MSU_logo.pdf} \hfill
+      \includegraphics[width=0.33\pdfpagewidth]{figures/TU_logo.pdf}
+    \end{figure}
+  }
+
+\begin{document}
+\maketitle
+%\frontmatter
+
+\pagestyle{empty}
+\newpage\
+\null\
+\vfill
+\begin{fullwidth}
+\begin{center}
+  \includegraphics[width=0.15\textwidth]{figures/by-nc-sa.eps}
+
+This work, including its figures and source code (where applicable), is
+licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+International License.  To view a copy of this license, visit
+\url{http://creativecommons.org/licenses/by-nc-sa/4.0/deed.en_US}.
+\end{center}
+\end{fullwidth}
+\pagestyle{fancy}
+
+\tableofcontents
+%\lstlistoflistings
+
+\include{chapters/Introduction}
+\mainmatter
+\part{The Basics}
+\include{chapters/Getting_your_toes_wet}
+\include{chapters/Structuring_your_code}
+\include{chapters/The_magic_of_makefiles}
+\include{chapters/Debugging}
+\include{chapters/Coding_style}
+\include{chapters/Revision_control}
+\part{Advanced Numerics \& Visualization}
+\include{chapters/Optimization}
+\include{chapters/Random_numbers}
+\include{chapters/Linear_algebra}
+\include{chapters/Plotting_with_plplot}
+\include{chapters/Parallel_computing}
+\backmatter
+\Chapter{Further reading}{a.k.a\ programmer humor}
+\begin{itemize}
+  \item \href{http://www.pbm.com/~lindahl/real.programmers.html}{Real programmers don't use Pascal} (\textbf{Mandatory})
+  \item \href{https://gist.github.com/alanbriolat/3135713#file-fortran_hell-f95}{The many faces of function definition in Fortran 95} (\textbf{Mandatory})
+  \item \href{http://www.codinghorror.com/blog/2006/05/the-ten-commandments-of-egoless-programming.html}{The Ten Commandments of Egoless Programming}
+  \item \href{http://james-iry.blogspot.com/2009/05/brief-incomplete-and-mostly-wrong.html}{A Brief, Incomplete, and Mostly Wrong History of Programming}
+  \item \href{https://www.gnu.org/fun/jokes/ed-msg.html}{\texttt{Ed, man! !man ed}}
+  \item \href{http://blog.sanctum.geek.nz/vim-koans/}{Vim k\={o}ans}
+\end{itemize}
+
+\printindex
+
+\end{document}
