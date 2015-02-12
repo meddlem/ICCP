@@ -21,7 +21,7 @@ subroutine InitCell(r,a,N)
            unitcell(3,2:3) = a/sqrt(2.0)
            unitcell(4,1:3:2) = a/sqrt(2.0)
            
-           M = int((N/4)**(1.0/3.0)) !nr of cell shifts in any direction
+           M = int((N/4)**(1./3.)) !nr of cell shifts in any direction
            S = 0
            
            ! shifts the unit cell in steps of a (in x,y,z) to form an FCC lattice, with N "atoms"

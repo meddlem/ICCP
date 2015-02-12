@@ -23,7 +23,7 @@ all: $(PROG)
 main: $(OBJS)
 	$(LINK) -o $@ $^ $(LIBS)
 
-%.o: %.f90
+%.o: %.f95
 	$(COMPILE) -o $@ -c $<
 
 .PHONY: clean

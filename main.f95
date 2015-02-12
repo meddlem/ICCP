@@ -7,15 +7,16 @@ program main
       use Incs !module for calculating iterations
 
       implicit none
-      ! model parameters, constants
-      real(8), parameter :: dt = 0.3, a = 1., rc = 5., sigma = 0.01 ! defines: timestep, lattice constant (initial), potential cutoff length
-      integer, parameter :: N = 4000 !number of particles, multiple of 4
-      real(8), parameter :: beta = 1., m = 1., eps = 1., L = 10. ! beta ~ 1/T, m = mass, L=length 
-      real(8), parameter :: alpha = 24 * eps / m ! combine m and epsilon (of the LJ potential) into one constant 
-
-      ! some variables
+      ! model parameters (constants):
+      ! dt = timestep, rc = potential cutoff length, beta ~ 1/T, m = mass, L=length, eps and sigma belong to LJ potential 
+      real(8), parameter :: dt = 0.3, rc = 1., sigma = 0.01, beta =1., m = 1., eps = 1., L = 10. 
+      integer, parameter :: N = 8000 !number of particles, multiple of 4
+      real(8), parameter :: a = L/((N/4)**(1./3.)), alpha = 24. * eps / m 
+      ! declare variables
       real(8) :: r(N,3), v(N,3) ! declare position and velocity vectors 
       integer :: i
+
+      print *, a !test 
       
       ! initialize r and v
       call InitCell(r,a,N)
@@ -24,13 +25,13 @@ program main
       ! initialize plot
       call plotinit(-0.1*L,1.1*L) 
 
-      !where the magic happens: 
-      do i = 1,500
+      !where the magic happens, also there is a memory leak somewhere here: 
+      do i = 1,50
                 call plot_points(r) !calls plot points
                 call Vinc(r,v,dt,alpha,rc,sigma,L) !calc velocities
                 call Rinc(r,v,dt,L)  !calc particle positions
       enddo
-
+      print *, sum(r) !test
       call plend()
 
 end program main 

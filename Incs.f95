@@ -2,6 +2,7 @@ module Incs
       implicit none
       private
       public :: Vinc, Rinc
+
 contains
         ! to do: create better time integration algorithm, see verlets paper
 subroutine Rinc(r,v,dt,L)
@@ -9,8 +10,10 @@ subroutine Rinc(r,v,dt,L)
         implicit none
         real(8), intent(in) :: dt, L, v(:,:)
         real(8), intent(inout) :: r(:,:)
+        
         r = r+v*dt !computes positions at next timestep  
         r(:,:) = r(:,:) - floor(r(:,:)/L)*L ! implements PBC 
+
 end subroutine Rinc 
 
 subroutine Vinc(r,v,dt,alpha,rc,sigma,L)
@@ -24,24 +27,24 @@ subroutine Vinc(r,v,dt,alpha,rc,sigma,L)
         !using r at timestep n+1, v at n: compute v at timestep n+1
         
         N = size(r,1)
-        ! this can be optimized by cell list method, but also take into account newtons 3rd law: you only need to compute the force
-        ! between 2 particles once : F(i,j) = - F(j,i)
+        
+        ! the following can be optimized by cell list method, newtons 3rd law: F(i,j) = - F(j,i)
         do i=1,N
                 
                 F(:,:) = 0 ! initialize F for particle j on i 
                 
                 do j=1,N
+                        
                         if (i/=j) then ! no force by particle on itself
-                                dr(:) = r(i,:) - r(j,:) 
-                                dr(:) = dr(:) - nint(dr(:)/L)*L
                                 
-                                d = sqrt(sum(dr(:)**2))
+                                dr(:) = r(i,:) - r(j,:) 
+                                dr(:) = dr(:) - nint(dr(:)/L)*L ! implement PBC: shortest possible dx,dy,dz between particles
+                                d = sqrt(sum(dr(:)**2)) 
 
                                 if ((d<rc) .AND. (d>0.)) then ! only particle pairs with d below cutoff contribute
-                                        ! use closest direction vector (considering PBC) for calculating the force
+                                        ! use closest direction vector (considering PBC) for calculating the force of j on i
                                         
                                         F(j,:) = alpha*dr(:)*(2*(sigma**12)/(d**14)-(sigma**6)/(d**8))
-                                        !calculate magnitude of the force on i by j, LF(d,sigma)
                                 endif
                         endif
                 enddo  
