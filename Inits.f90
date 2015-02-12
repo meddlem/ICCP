@@ -41,7 +41,7 @@ end subroutine InitCell
 
 subroutine InitVel(v,m,beta,N)
         ! gives initial velocites based on maxwell-boltzmann dist
-        use maxwell !dont forget this here ! 
+        use functions !dont forget this here ! 
         implicit none
 
         real(8),intent(in) :: m, beta
