@@ -1,7 +1,7 @@
 module functions
       implicit none
       private
-      public :: MB, LJ
+      public :: MB
 contains
  
 real(8) function MB (m,beta)
@@ -22,12 +22,5 @@ real(8) function MB (m,beta)
 
         MB = u * std * sqrt((- 2.0 * log(s))/s) !could also include v*.. 
 end function MB
-
-real(8) function LJ (r,sigma)
-        ! gives interaction force between two particle from lennart jones 
-        ! potential 
-        real(8), intent(in) :: r, sigma
-        LJ = (2*(sigma**12)/(r**13)-(sigma**6)/(r**7))
-end function
 
 end module

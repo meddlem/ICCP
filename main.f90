@@ -22,13 +22,13 @@ program main
       call InitVel(v,m,beta,N)
       
       ! initialize plot
-      call plotinit(0d0,L) 
+      call plotinit(-0.1*L,1.1*L) 
 
       !where the magic happens: 
-      do i = 1,50
+      do i = 1,500
                 call plot_points(r) !calls plot points
+                call Vinc(r,v,dt,alpha,rc,sigma,L) !calc velocities
                 call Rinc(r,v,dt,L)  !calc particle positions
-                call Vinc(r,v,dt,alpha,rc,sigma) !calc velocities
       enddo
 
       call plend()
