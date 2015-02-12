@@ -9,29 +9,31 @@ program main
       implicit none
       ! model parameters (constants):
       ! dt = timestep, rc = potential cutoff length, beta ~ 1/T, m = mass, L=length, eps and sigma belong to LJ potential 
-      real(8), parameter :: dt = 0.3, rc = 1., sigma = 0.01, beta =1., m = 1., eps = 1., L = 10. 
-      integer, parameter :: N = 8000 !number of particles, multiple of 4
+      real(8), parameter :: dt = 0.3, rc = 1., sigma = 0.01, beta = 1., m = 1., eps = 1., L = 10. 
+      integer, parameter :: N = 864 !number of particles, multiple of 4
       real(8), parameter :: a = L/((N/4)**(1./3.)), alpha = 24. * eps / m 
       ! declare variables
-      real(8) :: r(N,3), v(N,3) ! declare position and velocity vectors 
+      real(8) :: T, r(N,3), v(N,3) ! declare position and velocity vectors 
       integer :: i
 
-      print *, a !test 
       
       ! initialize r and v
       call InitCell(r,a,N)
       call InitVel(v,m,beta,N)
+      print *, "vsum t=0:", sum(v) !test if total momentum is constant 
       
       ! initialize plot
       call plotinit(-0.1*L,1.1*L) 
 
       !where the magic happens, also there is a memory leak somewhere here: 
       do i = 1,50
+                T = sum(v**2)/N ! calculate the temperatue at timestep i
                 call plot_points(r) !calls plot points
                 call Vinc(r,v,dt,alpha,rc,sigma,L) !calc velocities
                 call Rinc(r,v,dt,L)  !calc particle positions
+                print *, T
       enddo
-      print *, sum(r) !test
+      print *, "vsum final:", sum(v) !test if total momentum is constant
       call plend()
 
 end program main 
