@@ -1,40 +1,54 @@
 program main
-      ! modules to use 
-      ! use functions
-      use plplot !plotting library 
-      use plotpoints !module for plotting particles
-      use Inits !module for initializing model
-      use Incs !module for calculating iterations
+! modules to use 
+! use functions
+use plplot !plotting library 
+use plotpoints !module for plotting particles
+use Inits !module for initializing model
+use Force !module for calculating iterations
 
-      implicit none
-      ! model parameters (constants):
-      ! dt = timestep, rc = potential cutoff length, beta ~ 1/T, m = mass, L=length, eps and sigma belong to LJ potential 
-      real(8), parameter :: dt = 0.3, rc = 1., sigma = 0.01, beta = 1., m = 1., eps = 1., L = 10. 
-      integer, parameter :: N = 864 !number of particles, multiple of 4
-      real(8), parameter :: a = L/((N/4)**(1./3.)), alpha = 24. * eps / m 
-      ! declare variables
-      real(8) :: T, r(N,3), v(N,3) ! declare position and velocity vectors 
-      integer :: i
+implicit none
+! model parameters (constants):
+! dt = timestep, rc = potential cutoff length, beta ~ 1/T, m = mass, L=length, units: eps=1 and sigma=1
+real(8), parameter :: dt = 0.00032, rc = 2.5, beta = 1., m = 1., L = 10. 
+integer, parameter :: N = 6**3*4 !number of particles, must fit the FCC lattice 
+real(8), parameter :: a = L/((N/4)**(1./3.)) ! lattice constant, strenght of potential (effective) 
+! declare variables
+real(8) :: T, r(N,3), v(N,3), F(N,3) ! declare position and velocity vectors 
+integer :: i
 
-      
-      ! initialize r and v
-      call InitCell(r,a,N)
-      call InitVel(v,m,beta,N)
-      print *, "vsum t=0:", sum(v) !test if total momentum is constant 
-      
-      ! initialize plot
-      call plotinit(-0.1*L,1.1*L) 
+! initialize r, v, F
+call InitCell(r,a,N)
+call InitVel(v,m,beta,N)
+call ForceMatrix(r,F,m,rc,L)
 
-      !where the magic happens, also there is a memory leak somewhere here: 
-      do i = 1,50
-                T = sum(v**2)/N ! calculate the temperatue at timestep i
+!print *, "Psum t=0:", sum(v) !test if total momentum is constant 
+
+! initialize plot
+call plotinit(-0.1*L,1.1*L) 
+
+T = sum(v**2)/N ! calculate T
+print *, "T initial", T
+
+! time integration using velocity Verlet algorithm: 
+do i = 1,1200
+       ! T = sum(v**2)/N ! calculate the temperatue at timestep i
+      !  print *, T
+        if (modulo(i,10)==0) then
                 call plot_points(r) !calls plot points
-                call Vinc(r,v,dt,alpha,rc,sigma,L) !calc velocities
-                call Rinc(r,v,dt,L)  !calc particle positions
-                print *, T
-      enddo
-      print *, "vsum final:", sum(v) !test if total momentum is constant
-      call plend()
+        endif
+        r = r + v*dt + 0.5*F*(dt**2) !update positions
+        r = r - floor(r/L)*L !enforce PBC
+        v = v + 0.5*F*dt !update velocity (1/2)
+        call ForceMatrix(r,F,m,rc,L) !update force to next timestep
+        v = v + 0.5*F*dt !update velocity (2/2)
+
+enddo
+
+T = sum(v**2)/N ! calculate total energy, should be constant
+!print *, "T final:", T
+
+print *, "Psum final:", sum(v) !test if total momentum is constant
+call plend()
 
 end program main 
 

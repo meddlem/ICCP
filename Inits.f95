@@ -48,12 +48,18 @@ subroutine InitVel(v,m,beta,N)
         integer, intent(in) :: N
         real(8), intent(out) :: v(N,3)
         integer :: i, j
+        real(8) :: Vavg(3)
         ! pick velocity components randomly from maxwell boltzmann velocity distribution
         do i=1,N
                 do j=1,3
                         v(i,j) = MB(m,beta) 
                 enddo
         enddo
+        
+        Vavg = sum(v,1)/N
+        do i = 1,3
+                v(:,i) = v(:,i) - Vavg(i) ! make sure total momentum = 0
+        enddo 
 
 end subroutine InitVel 
 
