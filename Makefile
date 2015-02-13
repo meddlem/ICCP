@@ -12,8 +12,7 @@ PROG = main #program name
 
 #required objects: 
 OBJS =
-OBJS += functions.o
-OBJS += Force.o
+OBJS += Interactions.o
 OBJS += Inits.o
 OBJS += plotpoints.o
 OBJS += main.o
