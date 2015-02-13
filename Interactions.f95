@@ -23,10 +23,10 @@ subroutine Force(F,EV,r,rc,L)
         do while (j<i)
                 dr = r(i,:) - r(j,:) 
                 dr = dr - nint(dr/L,kind=8)*L ! implement PBC
-                d = dsqrt(sum(dr**2d0)) 
+                d = sqrt(sum(dr**2d0)) 
                 
-                if (d>(dsqrt(3d0)*L)) then !check
-                        print *, "broken, reduce dt", d
+                if (d>(sqrt(3d0)*L)) then !check
+                        print *, "warning: reduce dt", d
                 endif
 
                 if (d<rc) then ! only particle pairs with d<rc contribute
