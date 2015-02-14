@@ -4,7 +4,6 @@ program main
   use Plotroutines !module for plotting particles
   use Inits !module for initializing model
   use Interactions !module for calculating the interaction forces
-
   implicit none
 
   ! model parameters (constants):
@@ -51,10 +50,9 @@ program main
   print *, "E final: ", E(steps+1)/N 
   print *, "Psum final: ", sum(v,1)
 
-  x = (/(i,i=0,steps)/)
-  xrange = [0,steps]
-  yrange = [0d0,maxval(T)]
+  x = (/(i,i=0, steps)/)
+  xrange = [0, steps]
+  yrange = [0d0, maxval(T)]
   
   call LinePlot(x,T,xrange,yrange,xlabel,ylabel,label)
-
 end program main 

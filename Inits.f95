@@ -7,8 +7,6 @@ contains
 
   subroutine InitCell(r,L,N) 
     ! gives initial positions based on FCC lattice
-    implicit none 
-
     real(8), intent(in) :: L
     integer, intent(in) :: N
     real(8), intent(out) :: r(N,3)
@@ -27,7 +25,6 @@ contains
     S = 0 
 
     ! shifts the unit cell in steps of a (in x,y,z) to form an FCC lattice, with N "atoms"
-
     do i = 0,M-1
       do j = 0,M-1
         do k = 0,M-1
@@ -43,8 +40,6 @@ contains
 
   subroutine InitVel(v,Tinit,N)
     ! gives initial velocites based on maxwell-boltzmann dist
-    implicit none
-
     real(8),intent(in) :: Tinit
     integer, intent(in) :: N
     real(8), intent(out) :: v(N,3)
@@ -78,18 +73,13 @@ contains
       std = sqrt(Tinit) !define std of velocity distribution
       ! generate normal dist number with std as above, 
       ! using box-muller
-
       call random_number(u)
-
       MB = std*sqrt(-2d0*log(u(1)))*cos(2*pi*u(2))
-
     end function MB
-
   end subroutine InitVel 
 
   ! initialize random seed, taken from ICCP github
   subroutine init_random_seed()
-    implicit none
     integer, allocatable :: seed(:)
     integer :: i, n, un, istat, dt(8), pid, t(2), s
     integer(8) :: count, tms

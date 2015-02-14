@@ -1,14 +1,11 @@
 module Plotroutines
+  use plplot
   implicit none
   private
   public :: ParticlePlot, ParticlePlotinit, LinePlot
 
 contains
-
   subroutine ParticlePlotinit(xmin,xmax)
-    !use plplot !library for plotting
-    use plplot 
-    implicit none
     real(8), intent(in) :: xmin, xmax
 
     ! plotting stuff 
@@ -23,15 +20,11 @@ contains
     call plw3d(1d0, 1d0, 1.2d0, xmin, xmax, xmin, xmax, xmin, xmax, 20d0, 45d0)
 
     call plspause(.false.)
-
   end subroutine ParticlePlotinit  
 
   subroutine ParticlePlot(r)
-    use plplot
-    implicit none
     !plots all particle position
     real(8), intent(in) :: r(:,:) !r(N,3) 
-
     call plclear()
     call plcol0(1) !axis color
     call plbox3("bnstu", "x", 0d0, 0, "bnstu", "y", 0d0, 0, "bcdmnstuv", "z", 0d0, 0) !plots the axes etc
@@ -42,8 +35,6 @@ contains
   end subroutine ParticlePlot 
 
   subroutine Lineplot(x,y,xrange,yrange,xlabel,ylabel,label)
-    use plplot
-    implicit none 
     real(8), intent(in) :: xrange(2), yrange(2), x(:), y(:)
     character(10), intent(in) :: xlabel, ylabel, label 
 
@@ -65,9 +56,6 @@ contains
   end subroutine LinePlot 
 
   subroutine Colors()
-    use plplot
-    implicit none
-
     ! redefining colors
     call plscol0(0,255,255,255)
     call plscol0(1,255,0,0)
@@ -79,7 +67,6 @@ contains
     call plscol0(7,0,0,0)
     call plscol0(8,255,70,0)
     call plscol0(9,128,128,128)
-
   end subroutine Colors
 
 end module 

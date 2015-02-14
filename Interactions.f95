@@ -6,8 +6,6 @@ module Interactions
 contains
 
   subroutine Force(F,EV,r,rc,L)
-    implicit none
-
     real(8), intent(in) :: rc, L, r(:,:)
     real(8), intent(out) :: F(:,:), EV
     real(8) :: d, dr(3), FMAT(size(r,1),size(r,1),3)
@@ -43,7 +41,6 @@ contains
     !# $omp end parallel do
 
     F = sum(FMAT,2) !calculate total force vector on particle i
-
   end subroutine Force
 
 end module 
