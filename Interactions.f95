@@ -18,6 +18,7 @@ subroutine Force(F,EV,r,rc,L)
       FMAT(:,:,:) = 0d0
       EV = 0d0
 
+      !# $omp parallel do private(dr, d)
       do i = 1,N
         j = 1
         do while (j<i)
@@ -31,23 +32,16 @@ subroutine Force(F,EV,r,rc,L)
 
                 if (d<rc) then ! only particle pairs with d<rc contribute
                         FMAT(i,j,:) = 48d0*dr*(1d0/(d**14d0)-0.5d0/(d**8d0))
-                        EV = EV + LJ(d)
+                        EV = EV + 4d0*(1d0/(d**12d0)-1d0/(d**6d0))
                 endif
                 
                 FMAT(j,i,:) = - FMAT(i,j,:) !use N3
                 j = j+1
         enddo
       enddo
+      !# $omp end parallel do
 
       F = sum(FMAT,2) !calculate total force vector on particle i
-
-      contains 
-        
-      real(8) function LJ(d)
-                real(8), intent(in) :: d
-                
-                LJ = 4d0*(1d0/(d**12d0)-1d0/(d**6d0))
-      end function LJ
 
 end subroutine Force
 
