@@ -1,11 +1,11 @@
 module Inits
   implicit none
   private
-  public :: InitVel, InitCell
+  public :: InitP, InitR
 
 contains
 
-  subroutine InitCell(r,L,N) 
+  subroutine InitR(r,L,N) 
     ! gives initial positions based on FCC lattice
     real(8), intent(in) :: L
     integer, intent(in) :: N
@@ -21,10 +21,11 @@ contains
     unitcell(3,2:3) = a/sqrt(2d0)
     unitcell(4,1:3:2) = a/sqrt(2d0)
 
-    M = int((N/4)**(1./3.)) !nr of cell shifts in any direction
+    M = int((N/4)**(1./3.)) ! # unit cell shifts in any direction
     S = 0 
 
-    ! shifts the unit cell in steps of a (in x,y,z) to form an FCC lattice, with N "atoms"
+    ! shifts the unit cell in steps of a (in x,y,z) to form an FCC lattice,&
+    ! with N "atoms"
     do i = 0,M-1
       do j = 0,M-1
         do k = 0,M-1
@@ -36,47 +37,47 @@ contains
         enddo
       enddo 
     enddo
-  end subroutine InitCell  
+  end subroutine InitR  
 
-  subroutine InitVel(v,Tinit,N)
-    ! gives initial velocites based on maxwell-boltzmann dist
+  subroutine InitP(p,Tinit,N)
+    ! gives initial momenta based on maxwell-boltzmann dist
     real(8),intent(in) :: Tinit
     integer, intent(in) :: N
-    real(8), intent(out) :: v(N,3)
+    real(8), intent(out) :: p(N,3)
     integer :: i, j
-    real(8) :: Vavg(3)
+    real(8) :: Pavg(3)
 
     call init_random_seed()
 
-    ! pick velocity components from MB velocity distribution
+    ! pick momentum components from MB distribution
     do i=1,N
       do j=1,3
-        v(i,j) = MB(Tinit) 
+        p(i,j) = MB(Tinit) 
       enddo
     enddo
 
-    Vavg = sum(v,1)/N
+  Pavg = sum(p,1)/N
 
-    do i = 1,3
-      v(:,i) = v(:,i) - Vavg(i) ! make sure total momentum = 0
+    do i =1,3
+      p(:,i) = p(:,i) - Pavg(i) ! make sure total momentum = 0
     enddo 
 
   contains
 
     real(8) function MB (Tinit)
-      ! gives random velocity (component) based on maxwell boltzmann
+      ! gives random momentum (component) based on maxwell boltzmann
       ! distribution
       real(8), parameter :: pi = 4*atan(1d0) 
       real(8), intent(in) :: Tinit
       real(8) :: u(2), std
 
-      std = sqrt(Tinit) !define std of velocity distribution
+      std = sqrt(Tinit) !define std of momentum distribution
       ! generate normal dist number with std as above, 
       ! using box-muller
       call random_number(u)
       MB = std*sqrt(-2d0*log(u(1)))*cos(2*pi*u(2))
     end function MB
-  end subroutine InitVel 
+  end subroutine InitP 
 
   ! initialize random seed, taken from ICCP github
   subroutine init_random_seed()
