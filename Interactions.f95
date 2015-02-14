@@ -10,11 +10,11 @@ subroutine Force(F,EV,r,rc,L)
 
       real(8), intent(in) :: rc, L, r(:,:)
       real(8), intent(out) :: F(:,:), EV
-      integer :: N, i, j
       real(8) :: d, dr(3), FMAT(size(r,1),size(r,1),3)
-
+      integer :: i, j, N
+        
+      ! initialize
       N = size(r,1)
-      F(:,:) = 0d0
       FMAT(:,:,:) = 0d0
       EV = 0d0
 
@@ -28,9 +28,10 @@ subroutine Force(F,EV,r,rc,L)
                 
                 if (d>(sqrt(3d0)*L)) then !check
                         print *, "warning: reduce dt", d
+                        stop
                 endif
 
-                if (d<rc) then ! only particle pairs with d<rc contribute
+                if (d<rc) then ! only particle pairs with d<rc contribute to E, F
                         FMAT(i,j,:) = 48d0*dr*(1d0/(d**14d0)-0.5d0/(d**8d0))
                         EV = EV + 4d0*(1d0/(d**12d0)-1d0/(d**6d0))
                 endif

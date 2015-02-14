@@ -41,11 +41,11 @@ subroutine InitCell(r,L,N)
         enddo
 end subroutine InitCell  
 
-subroutine InitVel(v,beta,N)
+subroutine InitVel(v,Tinit,N)
         ! gives initial velocites based on maxwell-boltzmann dist
         implicit none
 
-        real(8),intent(in) :: beta
+        real(8),intent(in) :: Tinit
         integer, intent(in) :: N
         real(8), intent(out) :: v(N,3)
         integer :: i, j
@@ -56,7 +56,7 @@ subroutine InitVel(v,beta,N)
         ! pick velocity components from MB velocity distribution
         do i=1,N
                 do j=1,3
-                        v(i,j) = MB(beta) 
+                        v(i,j) = MB(Tinit) 
                 enddo
         enddo
         
@@ -68,22 +68,24 @@ subroutine InitVel(v,beta,N)
         
 contains
 
-        real(8) function MB (beta)
+        real(8) function MB (Tinit)
                 ! gives random velocity (component) based on maxwell boltzmann
                 ! distribution
-                real(8), intent(in) :: beta
-                real(8) :: u(2), std, pi
+                real(8), parameter :: pi = 4*atan(1d0) 
+                real(8), intent(in) :: Tinit
+                real(8) :: u(2), std
 
-                pi = 4*atan(1d0) 
-
-                std = sqrt(1d0/beta) !define std of velocity distribution
+                std = sqrt(Tinit) !define std of velocity distribution
                 ! generate normal dist number with std as above, 
                 ! using box-muller
 
                 call random_number(u)
 
                 MB = std*sqrt(-2d0*log(u(1)))*cos(2*pi*u(2))
+
         end function MB
+
+end subroutine InitVel 
 
 ! initialize random seed, taken from ICCP github
 subroutine init_random_seed()
@@ -130,7 +132,5 @@ subroutine init_random_seed()
   end if
   call random_seed(put=seed)
 end subroutine init_random_seed
-
-end subroutine InitVel 
 
 end module 

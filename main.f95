@@ -8,17 +8,17 @@ use Interactions !module for calculating the interaction forces
 implicit none
 
 ! model parameters (constants):
-! dt = timestep, rc = potential cutoff length, beta ~ 1/inital temp, m = mass, L=length, units: eps=1, sigma=1, m=1
-real(8), parameter :: dt = 0.001d0, rc = 2.5d0, beta = 3d0, L = 14d0, eps = 1d0, sigma = 1d0, m = 1d0  
+! dt = timestep, rc = potential cutoff length, Tinit ~ inital temp, m = mass, L=length, units: eps=1, sigma=1, m=1
+real(8), parameter :: dt = 0.001d0, rc = 2.5d0, Tinit = 0.3d0, L = 14d0, eps = 1d0, sigma = 1d0, m = 1d0  
 integer, parameter :: steps = 1000, N = 6**3*4 !number of particles, must fit the FCC lattice 
-character(len=10), parameter :: xlabel = "time", ylabel = "E", label = "."
+character(10), parameter :: xlabel = "time", ylabel = "E", label = "." !axislabels
 ! declare variables
 real(8) :: x(steps+1), xrange(2), yrange(2), T(steps+1), E(steps+1), EV, r(N,3), v(N,3), F(N,3) 
 integer :: i
 
 ! initialize r, v, F
 call InitCell(r,L,N)
-call InitVel(v,beta,N)
+call InitVel(v,Tinit,N)
 call Force(F,EV,r,rc,L)
 
 ! initialize 3Dplot

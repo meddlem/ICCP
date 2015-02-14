@@ -5,6 +5,27 @@ module plotpoints
 
 contains
 
+subroutine ParticlePlotinit(xmin,xmax)
+        !use plplot !library for plotting
+        use plplot 
+        implicit none
+        real(8), intent(in) :: xmin, xmax
+
+        ! plotting stuff 
+        call Colors()
+        call plsdev("xcairo")
+        call plinit()
+        call pladv(0)
+        
+        ! define viewport, world coords for the edges
+        call plvpor(0d0, 1d0, 0d0, 0.9d0)
+        call plwind(-1d0,1d0,-1d0,1.5d0)
+        call plw3d(1d0, 1d0, 1.2d0, xmin, xmax, xmin, xmax, xmin, xmax, 20d0, 45d0)
+
+        call plspause(.false.)
+
+end subroutine ParticlePlotinit  
+
 subroutine ParticlePlot(r)
         use plplot
         implicit none
@@ -20,13 +41,33 @@ subroutine ParticlePlot(r)
         call plflush()
 end subroutine ParticlePlot 
 
-subroutine ParticlePlotinit(xmin,xmax)
-        !use plplot !library for plotting
-        use plplot 
-        implicit none
-        real(8), intent(in) :: xmin, xmax
+subroutine Lineplot(x,y,xrange,yrange,xlabel,ylabel,label)
+        use plplot
+        implicit none 
+        real(8), intent(in) :: xrange(2), yrange(2), x(:), y(:)
+        character(10), intent(in) :: xlabel, ylabel, label 
 
-        ! plotting stuff 
+        call plparseopts(PL_PARSE_FULL)
+        call Colors() 
+        call plsdev("xcairo")
+        call plinit()
+        
+        !call plcol0(3)
+        call plenv(xrange(1),xrange(2),yrange(1),yrange(2),0,0)
+        call pllab(xlabel,ylabel,label) 
+
+        !call plcol0(1)
+        call plline(x,y)
+        call plspause(.true.) 
+        !call plcol(2)
+        
+        call plend()
+end subroutine LinePlot 
+
+subroutine Colors()
+        use plplot
+        implicit none
+
         ! redefining colors
         call plscol0(0,255,255,255)
         call plscol0(1,255,0,0)
@@ -39,51 +80,6 @@ subroutine ParticlePlotinit(xmin,xmax)
         call plscol0(8,255,70,0)
         call plscol0(9,128,128,128)
 
-        call plsdev("xcairo")
-        call plinit()
-        call pladv(0)
-        
-        ! define viewport, world coords for the edges
-        call plvpor(0d0, 1d0, 0d0, 0.9d0)
-        call plwind(-1d0,1d0,-1d0,1.5d0)
-        call plw3d(1d0, 1d0, 1.2d0, xmin, xmax, xmin, xmax, xmin, xmax, 20d0, 45d0)
-
-        call plspause(.false.)
-
-end subroutine ParticlePlotinit  
-
-subroutine Lineplot(x,y,xrange,yrange,xlabel,ylabel,label)
-        use plplot
-        implicit none 
-        real(8), intent(in) :: xrange(2), yrange(2), x(:), y(:)
-        character(10), intent(in) :: xlabel, ylabel, label 
-        call plparseopts(PL_PARSE_FULL)
-        
-        call plscol0(0,255,255,255)
-        call plscol0(1,255,0,0)
-        call plscol0(2,0,255,0)
-        call plscol0(3,0,0,255)
-        call plscol0(4,255,0,255)
-        call plscol0(5,0,255,255)
-        call plscol0(6,255,255,0)
-        call plscol0(7,0,0,0)
-        call plscol0(8,255,70,0)
-        call plscol0(9,128,128,128)
-        
-        call plsdev("xcairo")
-        call plinit()
-        
-        !call plcol0(3)
-        call plenv(xrange(1),xrange(2),yrange(1),yrange(2),0,0)
-        call pllab(xlabel,ylabel,label) 
-
-        !call plcol0(1)
-        call plline(x,y)
-        call plspause(.true.) 
-        !call plcol(2)
-        ! call plpoin(x,y,2)
-        
-        call plend()
-end subroutine LinePlot 
+end subroutine Colors
 
 end module 
