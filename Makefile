@@ -14,7 +14,7 @@ PROG = main #program name
 OBJS =
 OBJS += Interactions.o
 OBJS += Inits.o
-OBJS += plotpoints.o
+OBJS += Plotroutines.o
 OBJS += main.o
 
 all: $(PROG)
