@@ -28,6 +28,7 @@ contains
 
         if (d>(sqrt(3d0)*L)) then !check
           print *, "warning: reduce dt", d
+          stop
         endif
 
         if (d<rc) then ! only particle pairs with d<rc contribute to E, F
@@ -35,14 +36,15 @@ contains
           VMAT(i,j) = 4d0*(1d0/(d**12d0)-1d0/(d**6d0))
         endif
 
-        FMAT(j,i,:) = - FMAT(i,j,:) ! use N3
+        FMAT(j,i,:) = - FMAT(i,j,:) ! use Newton3
         j = j+1
       enddo
     enddo
     !$omp end parallel do
-   
-    F = sum(FMAT,2) ! calculate total force vector on particle i
-    EV = sum(VMAT) ! total interaction energy
+    
+    ! calculate total force vectors, interaction energy
+    F = sum(FMAT,2) 
+    EV = sum(VMAT) 
     deallocate(FMAT,VMAT)
   end subroutine Force
 end module 
