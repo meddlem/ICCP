@@ -10,9 +10,9 @@ program main
   ! dt = timestep, rc = LJ potential cutoff length, Tinit = inital temp, &
   ! m = mass, rho = number density, units: eps=1, sigma=1, m=1, &
   ! steps = number of timesteps, N = number of particles, in FCC lattice 
-  real(8), parameter :: dt = 0.001d0, rc = 2.5d0, Tinit = 1d0, rho = 0.5d0, & 
+  real(8), parameter :: dt = 0.001d0, rc = 2.5d0, Tinit = 1d0, rho = 0.55d0, & 
     eps = 1d0, sigma = 1d0, m = 1d0  
-  integer, parameter :: steps = 1000, N = 6**3*4
+  integer, parameter :: steps = 1000, N = 7**3*4
   
   ! axis labels in plot:
   character(10), parameter :: xlabel = "time", ylabel = "T", label = "plot"   
@@ -36,13 +36,15 @@ program main
   print *, "Psum t=0 : ", sum(p,1) 
   print *, "E t=0 : ", E(1)/N 
   print *, "T t=0 : ", T(1)
-  call system_clock(starttime)
   
+  call system_clock(starttime)
   ! time integration using the "velocity Verlet" algorithm: 
   do i = 1,steps
     ! plot particle positions
-    call ParticlePlot(r) 
-    
+    if(mod(i,3)==0) then 
+      call ParticlePlot(r) 
+    endif
+
     r = r + p*dt + 0.5d0*F*(dt**2) !update positions
     r = r - floor(r/L)*L ! enforce PBC
     p = p + 0.5d0*F*dt ! update momentum (1/2)
@@ -53,9 +55,10 @@ program main
     T(i+1) = sum(p**2)/N
     E(i+1) = EV + 0.5d0*N*T(i+1)
   enddo
+  
   call system_clock(endtime)
   call plend()
-
+  
   print *, "runtime =", endtime-starttime
   print *, "Psum final: ", sum(p,1)
   print *, "E final: ", E(steps+1)/N 

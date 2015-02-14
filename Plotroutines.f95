@@ -20,15 +20,17 @@ contains
     call plw3d(1d0, 1d0, 1.2d0, xmin, xmax, xmin, xmax, xmin, xmax, 20d0, 45d0)
 
     call plspause(.false.)
+    
   end subroutine ParticlePlotinit  
 
   subroutine ParticlePlot(r)
     !plots all particle position
     real(8), intent(in) :: r(:,:) !r(N,3) 
+    
     call plclear()
     call plcol0(1) !axis color
-    call plbox3("bnstu", "x", 0d0, 0, "bnstu", "y", 0d0, 0, "bcdmnstuv", "z", 0d0, 0) !plots the axes etc
-
+    call plbox3("bnstu", "x", 0d0, 0, "bnstu", "y", 0d0, 0, "bcdmnstuv", "z", &
+      0d0, 0) !plots the axes etc
     call plcol0(3) !point color
     call plpoin3(r(:,1), r(:,2), r(:,3), 4) !this plots the points
     call plflush()
