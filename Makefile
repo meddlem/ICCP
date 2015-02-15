@@ -12,6 +12,7 @@ PROG = main #program name
 
 #required objects: 
 OBJS =
+OBJS += fortplot.o
 OBJS += Interactions.o
 OBJS += Inits.o
 OBJS += Plotroutines.o

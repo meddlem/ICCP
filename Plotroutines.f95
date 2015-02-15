@@ -38,7 +38,7 @@ contains
 
   subroutine Lineplot(x,y,xrange,yrange,xlabel,ylabel,label)
     real(8), intent(in) :: xrange(2), yrange(2), x(:), y(:)
-    character(10), intent(in) :: xlabel, ylabel, label 
+    character(*), intent(in) :: xlabel, ylabel, label 
 
     call plparseopts(PL_PARSE_FULL)
     call Colors() 
