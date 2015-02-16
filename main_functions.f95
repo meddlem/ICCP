@@ -1,7 +1,7 @@
 module main_functions
   implicit none
   private
-  public :: measure, rescale
+  public :: measure, rescale, pressure
 
 contains
   subroutine measure(E,Ev,T,p,p_init,Cvv,r)
@@ -28,4 +28,19 @@ contains
     p = p*lambda
   end subroutine 
 
+  real(8) function pressure(virial,rc,T_init,rho,N)
+    real(8), intent(in) :: virial(:), rc, T_init, rho
+    integer, intent(in) :: N
+    real(8) :: pi = 4d0*atan(1d0), c1, c2
+    integer :: M, steps
+
+    steps = size(virial,1) - 1
+    M = steps/2 
+
+    ! correction due to virial theorem, correlation
+    c1 = 1d0/(3d0*N*T_init)*sum(virial(steps-M:steps+1))/(M+1)
+    c2 = -(16d0*pi/3d0)*(rho/T_init)*1d0/(rc**3)
+
+    pressure = 1d0 + c1 + c2
+  end function 
 end module
