@@ -16,6 +16,7 @@ OBJS += fortplot.o
 OBJS += Interactions.o
 OBJS += Inits.o
 OBJS += Plotroutines.o
+OBJS += main_functions.o
 OBJS += main.o
 
 all: $(PROG)

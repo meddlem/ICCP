@@ -2,7 +2,7 @@ module Plotroutines
   use plplot
   implicit none
   private
-  public :: ParticlePlot, ParticlePlotinit, LinePlot
+  public :: ParticlePlot, ParticlePlotinit !, LinePlot
 
 contains
   subroutine ParticlePlotinit(xmin,xmax)
@@ -36,27 +36,27 @@ contains
     call plflush()
   end subroutine ParticlePlot 
 
-  subroutine Lineplot(x,y,xrange,yrange,xlabel,ylabel,label)
-    real(8), intent(in) :: xrange(2), yrange(2), x(:), y(:)
-    character(*), intent(in) :: xlabel, ylabel, label 
-
-    call plparseopts(PL_PARSE_FULL)
-    call Colors() 
-    call plsdev("xcairo")
-    call plinit()
-
-    !call plcol0(3)
-    call plenv(xrange(1),xrange(2),yrange(1),yrange(2),0,0)
-    call pllab(xlabel,ylabel,label) 
-
-    !call plcol0(1)
-    call plline(x,y)
-    call plspause(.true.) 
-    !call plcol(2)
-
-    call plend()
-  end subroutine LinePlot 
-
+!  subroutine Lineplot(x,y,xrange,yrange,xlabel,ylabel,label)
+!    real(8), intent(in) :: xrange(2), yrange(2), x(:), y(:)
+!    character(*), intent(in) :: xlabel, ylabel, label 
+!
+!    call plparseopts(PL_PARSE_FULL)
+!    call Colors() 
+!    call plsdev("xcairo")
+!    call plinit()
+!
+!    !call plcol0(3)
+!    call plenv(xrange(1),xrange(2),yrange(1),yrange(2),0,0)
+!    call pllab(xlabel,ylabel,label) 
+!
+!    !call plcol0(1)
+!    call plline(x,y)
+!    call plspause(.true.) 
+!    !call plcol(2)
+!
+!    call plend()
+!  end subroutine LinePlot 
+!
   subroutine Colors()
     ! redefining colors
     call plscol0(0,255,255,255)

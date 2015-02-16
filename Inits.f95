@@ -39,9 +39,9 @@ contains
     enddo
   end subroutine InitR  
 
-  subroutine InitP(p,Tinit,N)
+  subroutine InitP(p,T_init,N)
     ! gives initial momenta based on maxwell-boltzmann dist
-    real(8),intent(in) :: Tinit
+    real(8),intent(in) :: T_init
     integer, intent(in) :: N
     real(8), intent(out) :: p(N,3)
     integer :: i, j
@@ -52,7 +52,7 @@ contains
     ! pick momentum components from MB distribution
     do i=1,N
       do j=1,3
-        p(i,j) = MB(Tinit) 
+        p(i,j) = MB(T_init) 
       enddo
     enddo
 
@@ -64,14 +64,14 @@ contains
 
   contains
 
-    real(8) function MB (Tinit)
+    real(8) function MB (T_init)
       ! gives random momentum (component) based on maxwell boltzmann
       ! distribution
       real(8), parameter :: pi = 4*atan(1d0) 
-      real(8), intent(in) :: Tinit
+      real(8), intent(in) :: T_init
       real(8) :: u(2), std
 
-      std = sqrt(Tinit) !define std of momentum distribution
+      std = sqrt(T_init) !define std of momentum distribution
       ! generate normal dist number with std as above, 
       ! using box-muller
       call random_number(u)

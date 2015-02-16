@@ -14,7 +14,7 @@ contains
 
     ! initialize, allocate large array
     N = size(r,1)
-    allocate(FMAT(N,N,3),VMAT(N,N), f_dot_dr(N,N))
+    allocate(FMAT(N,N,3),VMAT(N,N),f_dot_dr(N,N))
     FMAT(:,:,:) = 0d0
     VMAT(:,:) = 0d0
     f_dot_dr(:,:) = 0d0
