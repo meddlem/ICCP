@@ -39,7 +39,7 @@ module fortplot
       write(10,*) 'set ytics nomirror'
       write(10,*) 'set xrange [',0d0,':',&
         xmax+(xmax-xmin)*0.1D0,']'
-      write(10,*) 'set yrange [',0d0,':',&
+      write(10,*) 'set yrange [',ymin,':',&
         ymax+(ymax-ymin)*0.1D0,']'
       write(10,*) 'set key right center'
       write(10,*) 'set title "'//TRIM(title)//'"'

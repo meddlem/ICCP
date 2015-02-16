@@ -6,6 +6,8 @@ module Interactions
 
 contains
   subroutine Force(F,EV,virial,r,rc,L)
+    ! calculates net force on each particle, total potential energy, &
+    ! and the virial coefficient
     real(8), intent(in) :: rc, L, r(:,:)
     real(8), intent(out) :: F(:,:), EV, virial
     real(8) :: d, dr(3)

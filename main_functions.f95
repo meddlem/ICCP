@@ -4,15 +4,14 @@ module main_functions
   public :: measure, rescale
 
 contains
-  subroutine measure(E,Ev,T,T_init,p,p_init,Cvv,r)
-    real(8), intent(in) :: Ev, T_init, p(:,:), p_init(:,:), r(:,:)
+  subroutine measure(E,Ev,T,p,p_init,Cvv,r)
+    ! calculates energy, potential energy, Temperature, velocity correlation
+    real(8), intent(in) :: Ev, p(:,:), p_init(:,:), r(:,:)
     real(8), intent(out) :: E, T, Cvv
     real(8) :: Ek
     integer :: N
     
     N = size(r,1)
-    ! calculate temp (T), total energy (E), velocity correlation Cvv
-    
     Ek = 0.5d0*sum(p**2)
     
     T = 2d0/3d0*Ek/N
@@ -21,6 +20,7 @@ contains
   end subroutine 
 
   subroutine rescale(p,T,T_init)
+    ! rescales momentum to keep temperature fixed, method by berendsen et al.
     real(8), intent(in) :: T_init, T
     real(8), intent(inout) :: p(:,:)
     real(8) :: lambda
