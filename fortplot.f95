@@ -56,6 +56,7 @@ module fortplot
 
       ! now call gnuplot and plot the curve
       ret = system('gnuplot gplot.txt')
+      ret = system('gpicview plot.png')
       ret = system('rm gplot.txt')
       ret = system('rm xydata.dat')
     end subroutine gnulineplot 

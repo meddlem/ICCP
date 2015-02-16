@@ -11,7 +11,7 @@ program main
   ! dt = timestep, rc = LJ potential cutoff length, Tinit = inital temp, &
   ! m = mass, rho = number density, units: eps=1, sigma=1, m=1, &
   ! steps = number of timesteps, N = number of particles, in FCC lattice 
-  real(8), parameter :: dt = 0.001d0, rc = 2.5d0, Tinit = 1d0, rho = 0.25d0, & 
+  real(8), parameter :: dt = 0.001d0, rc = 2.5d0, Tinit = 1d0, rho = 0.45d0, & 
     eps = 1d0, sigma = 1d0, m = 1d0  
   integer, parameter :: steps = 1000, N = 6**3*4
   logical, parameter :: prtplt = .true.
@@ -21,7 +21,7 @@ program main
     title1 = ""   
   
   ! declare variables:
-  real(8) :: x(steps+1), T(steps+1), E(steps+1), EV, &
+  real(8) :: x(steps+1), T(steps+1), E(steps+1), EV, virial(steps+1), &
     Ek, r(N,3), p(N,3), F(N,3), L = (N/rho)**(1./3.) 
   integer :: i, starttime, endtime
   
@@ -31,7 +31,7 @@ program main
   ! initialize r, p, F, and 3d plot:
   call InitR(r,L,N)
   call InitP(p,Tinit,N)
-  call Force(F,EV,r,rc,L)
+  call Force(F,EV,virial(1),r,rc,L)
   if(prtplt .eqv. .true.) then
     call ParticlePlotinit(-0.1d0*L,1.1d0*L) 
   endif
@@ -57,7 +57,7 @@ program main
     r = r + p*dt + 0.5d0*F*(dt**2) !update positions
     r = r - floor(r/L)*L ! enforce PBC
     p = p + 0.5d0*F*dt ! update momentum (1/2)
-    call Force(F,EV,r,rc,L) ! update force to next timestep
+    call Force(F,EV,virial(i+1),r,rc,L) ! update force to next timestep
     p = p + 0.5d0*F*dt ! update momentum (2/2)
     
     ! calculate temp, total energy at timestep i
@@ -76,5 +76,5 @@ program main
   print *, "E final: ", E(steps+1)/N 
   print *, "T final: ", T(steps+1)
   
-  call gnulineplot(x,T,xlabel,ylabel,title1,title)
+  call gnulineplot(x,E/N,xlabel,ylabel,title1,title)
 end program main 
