@@ -11,24 +11,22 @@ program main
   ! dt = timestep, rc = LJ potential cutoff length, Tinit = inital temp, &
   ! m = mass, rho = number density, units: eps=1, sigma=1, m=1, &
   ! steps = number of timesteps, N = number of particles, in FCC lattice 
-  real(8), parameter :: dt = 0.001d0, rc = 2.5d0, Tinit = 1d0, rho = 0.55d0, & 
+  real(8), parameter :: dt = 0.001d0, rc = 2.5d0, Tinit = 1d0, rho = 0.25d0, & 
     eps = 1d0, sigma = 1d0, m = 1d0  
   integer, parameter :: steps = 1000, N = 6**3*4
-  logical, parameter :: prtplt = .false.
+  logical, parameter :: prtplt = .true.
 
-  ! declare variables:
-  real(8) :: x(steps+1), xrange(2), yrange(2), T(steps+1), E(steps+1), EV, &
-    Ek, r(N,3), p(N,3), F(N,3), L = (N/rho)**(1./3.) 
-  integer :: i, starttime, endtime
-  
   ! axis labels in plot:
   character(10), parameter :: xlabel = "time", ylabel = "T", title = "plot", & 
     title1 = ""   
   
+  ! declare variables:
+  real(8) :: x(steps+1), T(steps+1), E(steps+1), EV, &
+    Ek, r(N,3), p(N,3), F(N,3), L = (N/rho)**(1./3.) 
+  integer :: i, starttime, endtime
+  
   ! variables for final plot
   x = (/(i,i=0, steps)/)
-  ! xrange = [0, steps]
-  ! yrange = [0d0, maxval(E/N)*1.1d0]
   
   ! initialize r, p, F, and 3d plot:
   call InitR(r,L,N)
