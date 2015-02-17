@@ -6,9 +6,11 @@ module plotroutines
 
 contains
 
-  subroutine gnulineplot(x,y,xlabel,ylabel,title1,title)
+  subroutine gnulineplot(x,y,xlabel,ylabel,title1,title,plot_no)
     real(8), intent(in) :: x(:), y(:)
     character(*), intent(in) :: xlabel, ylabel, title1, title
+    integer, intent(in) :: plot_no
+    character(1024) :: filename
     integer :: i, ret, n
     real(8) :: xmin, xmax, ymin, ymax
     
@@ -17,7 +19,7 @@ contains
     xmax = maxval(x)
     ymin = minval(y)
     ymax = maxval(y)
-    
+    write(filename,'(A,I1,A)') 'set output "plot',plot_no,'.png"'
     ! write data to files
     open(10,access = 'sequential',file = 'xydata.dat')
     do i=1,n
@@ -29,7 +31,8 @@ contains
     open(10,access = 'sequential',file = 'gplot.txt')
     ! write(10,*) 'set output "plot.eps"'
     write(10,*) 'set term png font "Fira Mono" 13'
-    write(10,*) 'set output "plot.png"'
+    !write(10,*) 'set output "filename"'
+    write(10,*) filename
     write(10,*) &
       'set style line 11 lt 1 lc rgbcolor "#000000" lw 1 #black'
     write(10,*) &
@@ -53,10 +56,10 @@ contains
     endif 
 
     close(10,status = 'keep')
-
+    
     ! now call gnuplot and plot the curve
     ret = system('gnuplot gplot.txt')
-    ret = system('gpicview plot.png')
+    ! ret = system('gpicview plot.png')
     ret = system('rm gplot.txt')
     ret = system('rm xydata.dat')
   end subroutine gnulineplot 
