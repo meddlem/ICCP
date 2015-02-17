@@ -1,4 +1,4 @@
-module Inits
+module inits
   implicit none
   private
   public :: InitP, InitR
@@ -56,27 +56,27 @@ contains
       enddo
     enddo
 
-  Pavg = sum(p,1)/N
+    Pavg = sum(p,1)/N
 
     do i =1,3
       p(:,i) = p(:,i) - Pavg(i) ! make sure total momentum = 0
     enddo 
 
-  contains
+    contains
 
-    real(8) function MB (T_init)
-      ! gives random momentum (component) based on maxwell boltzmann
-      ! distribution
-      real(8), parameter :: pi = 4*atan(1d0) 
-      real(8), intent(in) :: T_init
-      real(8) :: u(2), std
+      real(8) function MB (T_init)
+        ! gives random momentum (component) based on maxwell boltzmann
+        ! distribution
+        real(8), parameter :: pi = 4*atan(1d0) 
+        real(8), intent(in) :: T_init
+        real(8) :: u(2), std
 
-      std = sqrt(T_init) !define std of momentum distribution
-      ! generate normal dist number with std as above, 
-      ! using box-muller
-      call random_number(u)
-      MB = std*sqrt(-2d0*log(u(1)))*cos(2*pi*u(2))
-    end function MB
+        std = sqrt(T_init) !define std of momentum distribution
+        ! generate normal dist number with std as above, 
+        ! using box-muller
+        call random_number(u)
+        MB = std*sqrt(-2d0*log(u(1)))*cos(2*pi*u(2))
+      end function MB
   end subroutine InitP 
 
   ! initialize random seed, taken from ICCP github

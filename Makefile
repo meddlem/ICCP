@@ -1,5 +1,5 @@
 FC = gfortran
-FFLAGS = -Wall -march=native -O5 -fopenmp #compiler flags
+FFLAGS = -Wall -march=native -O3 -fopenmp #compiler flags
 LDFLAGS = -fopenmp #link flags
 
 FFLAGS += $(shell pkg-config --cflags plplotd-f95)
@@ -13,9 +13,9 @@ PROG = main #program name
 #required objects: 
 OBJS =
 # OBJS += constants.o
-OBJS += Interactions.o
-OBJS += Inits.o
-OBJS += Plotroutines.o
+OBJS += inits.o
+OBJS += interactions.o
+OBJS += plotroutines.o
 OBJS += main_functions.o
 OBJS += main.o
 

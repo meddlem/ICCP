@@ -1,4 +1,4 @@
-module Plotroutines
+module plotroutines
   use plplot
   implicit none
   private

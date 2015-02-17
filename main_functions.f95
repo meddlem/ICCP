@@ -39,8 +39,8 @@ contains
 
     ! correction due to virial theorem, correlation
     c1 = 1d0/(3d0*N*T_init)*sum(virial(steps-M:steps+1))/(M+1)
-    c2 = -(16d0*pi/3d0)*(rho/T_init)*1d0/(rc**3)
-
+    ! c2 = -(16d0*pi/3d0)*(rho/T_init)*1d0/(rc**3)
+    c2 = -((16d0*pi*rho)/T_init)*(1d0/(3d0*(rc**3)) - 1d0/(5d0*(rc**9)))
     pressure = 1d0 + c1 + c2
   end function 
 end module

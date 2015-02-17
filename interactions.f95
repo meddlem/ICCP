@@ -1,4 +1,4 @@
-module Interactions
+module interactions
   use omp_lib
   implicit none
   private 

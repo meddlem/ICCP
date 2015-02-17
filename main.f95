@@ -2,17 +2,17 @@ program main
   ! modules to use 
   use plplot ! plotting library 
   use main_functions ! additional functions and subroutines
-  use Plotroutines ! module for plotting particles
-  use Inits ! initialize the model
-  use Interactions ! calculating the interaction forces and energies
+  use plotroutines ! module for plotting particles
+  use inits ! initialize the model
+  use interactions ! calculating the interaction forces and energies
   implicit none
 
   ! model parameters (constants):
   ! dt = timestep, rc = LJ potential cutoff length, T_init = inital temp, &
-  ! m = mass, rho = number density, units: eps=1, sigma=1, m=1, &
+  ! m = mass, rho = number density, units: eps=1, sigma=1, m=1, kB=1 &
   ! steps = number of timesteps, N = number of particles, in FCC lattice 
-  real(8), parameter :: dt = 0.001d0, rc = 2.5d0, T_init = 2.889d0, & 
-    rho = 0.85d0,  pi = 4d0*atan(1d0)
+  real(8), parameter :: dt = 0.001d0, rc = 2.5d0, T_init = 1.095d0, & 
+    rho = 0.88d0,  pi = 4d0*atan(1d0)
   integer, parameter :: steps = 3600, N = 6**3*4
   logical, parameter :: prtplt = .false.
   real(8), parameter :: L = (N/rho)**(1./3.)
@@ -22,22 +22,24 @@ program main
     title1 = ""   
 
   ! declare variables: 
-  real(8) :: r(N,3), p(N,3), p_init(N,3), F(N,3), T(steps+1), E(steps+1), &
-    EV(steps+1), virial(steps+1), cvv(steps+1), eq_pres, x(steps+1)
+  real(8) :: r(N,3), r_init(N,3), p(N,3), p_init(N,3), F(N,3), T(steps+1), &
+    E(steps+1), EV(steps+1), virial(steps+1), cvv(steps+1), eq_pres, x(steps+1)
   integer :: i, start_time, end_time
   
-  ! initialize r, p, F, and 3d plot:
-  call InitR(r,L,N)
-  call InitP(p,T_init,N)
-  p_init = p
-  call Force(F,EV(1),virial(1),r,rc,L)
+  ! initialize the model:
+  call InitR(r_init,L,N)
+  call InitP(p_init,T_init,N)
+  call Force(F,EV(1),virial(1),r_init,rc,L)
   if(prtplt .eqv. .true.) then
     call ParticlePlotinit(-0.1d0*L,1.1d0*L) 
   endif
-
-  ! calculate initial temp, velocity correlation, energy
+  p = p_init 
+  r = r_init
+  
+  ! measure initial temp, velocity correlation, energy
   call measure(E(1),Ev(1),T(1),p,p_init,cvv(1),r)
   
+  print *, "starting simulation: ", steps, "iterations"
   call system_clock(start_time)
   ! time integration using the "velocity Verlet" algorithm: 
   do i = 1,steps
@@ -71,10 +73,11 @@ program main
   endif 
 
   print *, "runtime =", (end_time-start_time)/1000, "s"
+  print *, "rho =", rho
   print *, "pressure =", eq_pres
   print *, "T final: ", T(steps+1)
   
   ! final plot
   x = dt*(/(i,i=0, steps)/)
-!  call gnulineplot(x(1:100),cvv(1:100),xlabel,ylabel,title1,title)
+  ! call gnulineplot(x(1:100),cvv(1:100),xlabel,ylabel,title1,title)
 end program main 
