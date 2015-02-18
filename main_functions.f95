@@ -1,7 +1,7 @@
 module main_functions
   implicit none
   private
-  public :: measure, rescale, pressure, heat_cap
+  public :: measure, rescale, pressure, heat_cap, rdf
   real(8), parameter :: pi = 4d0*atan(1d0)
 
 contains
@@ -61,4 +61,15 @@ contains
     sigma_u_2 = sum((U(M:steps+1)-sum(U(M:steps+1)/M))**2)/M
     heat_cap = (3d0/2d0)*N/(1 - (2d0/3d0)*sigma_u_2/(N*T_tgt**2))
   end function
+
+  subroutine rdf(g,bin,rm)     
+    integer, intent(in) :: bin(:)
+    real(8), intent(in) :: rm
+    real(8), intent(out) :: g(1000)
+    integer :: i
+    real(8) :: rs(1000)
+
+    rs = (/(i,i=0,999)/)*rm   
+    g = real(bin,kind=8)/(rs**2)
+  end subroutine 
 end module

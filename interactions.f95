@@ -2,15 +2,15 @@ module interactions
   use omp_lib
   implicit none
   private 
-  public :: force, make_nbr_list
+  public :: force, make_nbrs_list
 
 contains
-  subroutine force(F,U,virial,r,rc,L,n_list,n_nbrs)
+  subroutine force(F,U,virial,r,rc,L,nbrs_list,n_nbrs)
     ! calculates net force on each particle, total potential energy, &
     ! and the virial
     real(8), intent(in) :: rc, L, r(:,:)
     real(8), intent(out) :: F(:,:), U, virial
-    integer, intent(in) :: n_list(:,:), n_nbrs
+    integer, intent(in) :: nbrs_list(:,:), n_nbrs
     real(8) :: d, dr(3)
     real(8), allocatable :: FMAT(:,:,:), VMAT(:,:), f_dot_dr(:,:)
     integer :: i, j, k, N
@@ -25,8 +25,8 @@ contains
     !$omp parallel do private(d,dr)
     do k = 1,n_nbrs
       ! get all neighboring particles from the list
-      i = n_list(k,1)
-      j = n_list(k,2)
+      i = nbrs_list(k,1)
+      j = nbrs_list(k,2)
       
       dr = r(i,:) - r(j,:) 
       dr = dr - nint(dr/L,kind=8)*L ! implement PBC
@@ -48,17 +48,18 @@ contains
     deallocate(FMAT,VMAT,f_dot_dr)
   end subroutine
 
-  subroutine make_nbr_list(n_list,n_nbrs,r,rm,L)
+  subroutine make_nbrs_list(nbrs_list,n_nbrs,r,rm,L,bin)
     ! creates a list of all particles j within range rm of particle i
     real(8), intent(in) :: r(:,:), L, rm
-    integer, intent(out) :: n_list(:,:), n_nbrs
+    integer, intent(out) :: nbrs_list(:,:), n_nbrs
+    integer, intent(inout) :: bin(:)
     real(8) :: dr(3), d
     integer :: i, j, k, N
     
     N = size(r,1)
-    n_list(N*(N-1)/2,2) = 0
+    nbrs_list(N*(N-1)/2,2) = 0
     k = 0 
-    
+
     do i = 1,N
       do j = i+1,N
         dr = r(i,:) - r(j,:)
@@ -68,11 +69,10 @@ contains
         if (d>(sqrt(3d0)*L)) then !check
           print *, "warning: reduce dt", d
           stop
-        endif
-        
-        if (d<rm) then
+        elseif (d<rm) then
           k = k+1
-          n_list(k,:) = [i, j]
+          nbrs_list(k,:) = [i, j]
+          bin(int(999*d/rm)+1) = bin(int(999*d/rm)+1) + 1
         endif
       enddo
     enddo
