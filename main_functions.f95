@@ -16,7 +16,7 @@ contains
     N = size(r,1)
     Ek = 0.5d0*sum(p**2)
     ! apply long range correction to potential energy
-    U = U + 8d0*pi*rho*(1d0/(9d0*(rc**9))-1d0/(3d0*(rc**3)))
+    U = U + 8d0*pi*N*rho*(1d0/(9d0*(rc**9))-1d0/(3d0*(rc**3)))
 
     T = 2d0/3d0*Ek/N
     E = U + Ek
