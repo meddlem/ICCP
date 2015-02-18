@@ -49,7 +49,7 @@ contains
     ! calculate total force vectors, interaction energy
     F = sum(FMAT,2) 
     virial = sum(f_dot_dr) 
-    EV = sum(VMAT) 
+    EV = sum(VMAT)/N 
     deallocate(FMAT,VMAT)
   end subroutine Force
 end module 

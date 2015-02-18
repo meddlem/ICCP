@@ -49,12 +49,16 @@ contains
     pressure = 1d0 + c1 + c2
   end function 
 
-  real(8) function heat_cap(E,T_tgt)
-    real(8), intent(in) :: E(:), T_tgt
+  real(8) function heat_cap(U,T_tgt,N)
+    real(8), intent(in) :: U(:), T_tgt
+    integer, intent(in) :: N
+    real(8) :: sigma_u_2
     integer :: M, steps
-    steps = size(E)
+    steps = size(U)
     M = steps/2 
     ! calculate heat capacity, check if this is correct wrt number of steps etc
-    heat_cap = sum((E(M:steps+1)-sum(E(M:steps+1))/steps)**2)/(M*(T_tgt**2))
+    ! heat_cap = sum((E(M:steps+1)-sum(E(M:steps+1))/steps)**2)/(M*(T_tgt**2))
+    sigma_u_2 = sum((U(M:steps+1)-sum(U(M:steps+1)/M))**2)/M
+    heat_cap = (3d0/2d0)*N/(1 - (2d0/3d0)*sigma_u_2/(N*T_tgt**2))
   end function
 end module
