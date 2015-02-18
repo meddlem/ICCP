@@ -51,9 +51,10 @@ contains
 
   real(8) function heat_cap(E,T_tgt)
     real(8), intent(in) :: E(:), T_tgt
-    integer :: steps
+    integer :: M, steps
     steps = size(E)
-    
-    heat_cap = sum(E-sum(E)/steps)/(steps*(T_tgt**2))
+    M = steps/2 
+    ! calculate heat capacity, check if this is correct wrt number of steps etc
+    heat_cap = sum((E(M:steps+1)-sum(E(M:steps+1))/steps)**2)/(M*(T_tgt**2))
   end function
 end module

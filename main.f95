@@ -11,8 +11,8 @@ program main
   ! dt = timestep, rc = LJ potential cutoff length, T_init = inital temp, &
   ! m = mass, rho = number density, units: eps=1, sigma=1, m=1, kB=1 &
   ! steps = number of timesteps, N = number of particles, in FCC lattice 
-  real(8), parameter :: dt = 0.001d0, rc = 2.5d0, T_init = 0.9d0, & 
-    rho = 0.55d0,  pi = 4d0*atan(1d0)
+  real(8), parameter :: dt = 0.001d0, rc = 2.5d0, T_init = 1.462d0, & 
+    rho = 0.4d0,  pi = 4d0*atan(1d0)
   integer, parameter :: steps = 3600, N = 6**3*4
   logical, parameter :: prtplt = .false.
   real(8), parameter :: L = (N/rho)**(1d0/3d0)
@@ -41,10 +41,9 @@ program main
   
   do i = 1,steps
     ! plot particle positions
-    if((mod(i,3)==0) .and. (prtplt .eqv. .true.)) then 
+    if((mod(i,10)==0) .and. (prtplt .eqv. .true.)) then 
       call ParticlePlot(r) 
     endif
-
     r = r + p*dt + 0.5d0*F*(dt**2) !update positions
     r = r - floor(r/L)*L ! enforce PBC on positions
     p = p + 0.5d0*F*dt ! update momentum (1/2)
@@ -71,9 +70,10 @@ program main
 
   print *, "runtime =", (end_time-start_time)/1000, "s"
   print *, "rho =", rho
-  print *, "pressure =", eq_pres
-  ! print *, "heat capacity =", heat_cap(E,T_init)
+  print *, "equilibrium pressure =", eq_pres
+  print *, "heat capacity =", heat_cap(E,T_init)
   print *, "T final: ", T(steps+1)
+  print *, "U equilibrium =", U(steps+1)/N
   
   ! final plot
   x = dt*(/(i,i=0, steps)/)
