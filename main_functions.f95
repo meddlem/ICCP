@@ -43,7 +43,7 @@ contains
     M = steps/2 
 
     ! correction due to virial theorem(c1), long range correction(c2)
-    c1 = 1d0/(3d0*N*T_tgt)*sum(virial(steps-M:steps+1))/(M+1)
+    c1 = 1d0/(3d0*N*T_tgt)*sum(virial(steps-M:steps+1))/(M + 1)
     c2 = ((16d0*pi*rho)/T_tgt)*(2d0/(9d0*(rc**9)) - 1d0/(3d0*(rc**3))) 
     
     pressure = 1d0 + c1 + c2

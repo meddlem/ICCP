@@ -1,11 +1,11 @@
 module inits
   implicit none
   private
-  public :: InitP, InitR
+  public :: init_p, init_r
 
 contains
 
-  subroutine InitR(r,L,N) 
+  subroutine init_r(r,L,N) 
     ! gives initial positions based on FCC lattice
     real(8), intent(in) :: L
     integer, intent(in) :: N
@@ -37,9 +37,9 @@ contains
         enddo
       enddo 
     enddo
-  end subroutine InitR  
+  end subroutine  
 
-  subroutine InitP(p,T_init,N)
+  subroutine init_p(p,T_init,N)
     ! gives initial momenta based on maxwell-boltzmann dist
     real(8),intent(in) :: T_init
     integer, intent(in) :: N
@@ -62,22 +62,7 @@ contains
       p(:,i) = p(:,i) - Pavg(i) ! make sure total momentum = 0
     enddo 
 
-    contains
-
-      real(8) function MB (T_init)
-        ! gives random momentum (component) based on maxwell boltzmann
-        ! distribution
-        real(8), parameter :: pi = 4*atan(1d0) 
-        real(8), intent(in) :: T_init
-        real(8) :: u(2), std
-
-        std = sqrt(T_init) !define std of momentum distribution
-        ! generate normal dist number with std as above, 
-        ! using box-muller
-        call random_number(u)
-        MB = std*sqrt(-2d0*log(u(1)))*cos(2*pi*u(2))
-      end function MB
-  end subroutine InitP 
+  end subroutine 
 
   ! initialize random seed, taken from ICCP github
   subroutine init_random_seed()
@@ -122,6 +107,20 @@ contains
       end if
     end if
     call random_seed(put=seed)
-  end subroutine init_random_seed
+  end subroutine
+
+  real(8) function MB (T_init)
+    ! gives random momentum (component) based on maxwell boltzmann
+    ! distribution
+    real(8), parameter :: pi = 4*atan(1d0) 
+    real(8), intent(in) :: T_init
+    real(8) :: u(2), std
+
+    std = sqrt(T_init) !define std of momentum distribution
+    ! generate normal dist number with std as above, 
+    ! using box-muller
+    call random_number(u)
+    MB = std*sqrt(-2d0*log(u(1)))*cos(2*pi*u(2))
+  end function
 
 end module 

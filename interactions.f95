@@ -7,7 +7,7 @@ module interactions
 contains
   subroutine force(F,U,virial,r,rc,L,n_list,n_nbrs)
     ! calculates net force on each particle, total potential energy, &
-    ! and the virial coefficient
+    ! and the virial
     real(8), intent(in) :: rc, L, r(:,:)
     real(8), intent(out) :: F(:,:), U, virial
     integer, intent(in) :: n_list(:,:), n_nbrs
@@ -49,7 +49,7 @@ contains
   end subroutine
 
   subroutine make_nbr_list(n_list,n_nbrs,r,rm,L)
-    ! creates a list of all particles j within rm of particle i
+    ! creates a list of all particles j within range rm of particle i
     real(8), intent(in) :: r(:,:), L, rm
     integer, intent(out) :: n_list(:,:), n_nbrs
     real(8) :: dr(3), d
@@ -58,8 +58,7 @@ contains
     N = size(r,1)
     n_list(N*(N-1)/2,2) = 0
     k = 0 
-
-    !# $omp parallel do private(d,dr)
+    
     do i = 1,N
       do j = i+1,N
         dr = r(i,:) - r(j,:)
@@ -77,7 +76,6 @@ contains
         endif
       enddo
     enddo
-    !# $omp end parallel do
     
     n_nbrs = k !get total # of nn pairs
   end subroutine
