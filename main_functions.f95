@@ -34,7 +34,23 @@ contains
     p = p*lambda
   end subroutine 
 
+  pure function radial_df(bin,n_bins,rho,rm,N,n_meas,up_nbrs_list)     
+    ! calculates radial distribution function from bin
+    integer, intent(in) :: bin(:), n_bins, N, n_meas, up_nbrs_list
+    real(8), intent(in) :: rho, rm
+    real(8) :: radial_df(n_bins)
+    integer :: i, m
+    real(8) :: rs(n_bins), delta_r
+    
+    m = n_meas/up_nbrs_list ! number of time points where we binned distances
+    delta_r = rm/n_bins ! bin size
+    rs = rm*(/(i,i=0,n_bins-1)/)/(n_bins)   
+
+    radial_df = 2d0/(rho*m*(N-1))*real(bin,kind=8)/(4d0*pi*delta_r*rs**2)
+  end function 
+  
   pure real(8) function pressure(virial,rc,T_tgt,rho,N,meas_start,n_meas)
+    ! calculates equilibrium pressure from virials
     real(8), intent(in) :: virial(:), rc, T_tgt, rho
     integer, intent(in) :: N, meas_start, n_meas
     integer :: m, s
@@ -50,32 +66,21 @@ contains
     pressure = 1d0 + c1 + c2
   end function 
 
-  pure real(8) function heat_cap(U,T_tgt,N,meas_start,n_meas)
-    real(8), intent(in) :: U(:), T_tgt
+  pure real(8) function heat_cap(E,T_tgt,N,meas_start,n_meas)
+    real(8), intent(in) :: E(:), T_tgt
     integer, intent(in) :: N, meas_start, n_meas
     integer :: m, s
-    real(8) :: sigma_u_2
+    real(8) :: sigma_E_2
     
     s = meas_start
     m = n_meas
 
     ! calculate heat capacity, check if this is correct wrt number of steps etc
-    sigma_u_2 = sum((U(s:s+m) - sum(U(s:s+m)/m))**2)/m
+    ! sigma_u_2 = sum((U(s:s+m) - sum(U(s:s+m)/m))**2)/m
+    sigma_E_2 = sum((E(s:s+m)-sum(E(s:s+m))/m)**2)/m
     ! dit is maar 1 manier, best voor constante T, niet voor constante E 
-    heat_cap = (3d0/2d0)*N/(1 - (2d0/3d0)*sigma_u_2/(N*T_tgt**2))
+    ! heat_cap = (3d0/2d0)*N/(1 - (2d0/3d0)*sigma_u_2/(N*T_tgt**2))
+    ! in NVT ensemble
+    heat_cap = 1d0/(T_tgt**2)*sigma_E_2
   end function
-
-  pure subroutine radial_df(g,bin,n_bins,rho,rm,n_meas)     
-    ! calculates radial distribution function from bin
-    integer, intent(in) :: bin(:), n_bins, n_meas
-    real(8), intent(in) :: rho, rm
-    real(8), intent(out) :: g(n_bins)
-    integer :: i, m
-    real(8) :: rs(n_bins)
-    
-    m = n_meas
-    
-    rs = rm*(/(i,i=0,n_bins-1)/)/(n_bins)   
-    g = real(bin,kind=8)/(m*4d0*pi*rho*rs**2)
-  end subroutine 
 end module

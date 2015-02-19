@@ -50,7 +50,7 @@ contains
   end subroutine
 
   subroutine make_nbrs_list(nbrs_list,n_nbrs,r,rm,L,bin)
-    ! creates a list of all particles j within range rm of particle i
+    ! creates a list of all particles j within distance rm of particle i
     real(8), intent(in) :: r(:,:), L, rm
     integer, intent(out) :: nbrs_list(:,:), n_nbrs
     integer, intent(out) :: bin(:)

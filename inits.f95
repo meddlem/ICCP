@@ -5,7 +5,6 @@ module inits
   real(8), parameter :: pi = 4*atan(1d0) 
 
 contains
-
   subroutine init_r(r,L,N) 
     ! gives initial positions based on FCC lattice
     real(8), intent(in) :: L
@@ -108,17 +107,14 @@ contains
     call random_seed(put=seed)
   end subroutine
 
-  real(8) function MB (T_tgt)
-    ! gives random momentum (component) based on maxwell boltzmann
-    ! distribution
+  real(8) function MB(T_tgt)
+    ! gives random momentum (component) based on maxwell boltzmann distribution
     real(8), intent(in) :: T_tgt
     real(8) :: u(2), std
 
-    std = sqrt(T_tgt) !define std of momentum distribution
-    ! generate normal dist number with std as above, 
-    ! using box-muller
+    std = sqrt(T_tgt) 
+    ! generate normal dist number using box-muller
     call random_number(u)
     MB = std*sqrt(-2d0*log(u(1)))*cos(2*pi*u(2))
   end function
-
 end module 

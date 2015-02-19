@@ -19,16 +19,14 @@ contains
     ymin = minval(y)
     ymax = maxval(y)
 
-    write(filename,'(A,I1,A)') 'set output "plot',plot_no,'.png"'
-    ! write data to files
     open(10,access = 'sequential',file = 'xydata.dat')
-    
     do i=1,n
-      write(10,*) x(i),y(i)
+      write(10,*) x(i),y(i) ! write datapoints to file
     enddo
-
     close(10,status = 'keep')
+    
     ! create gnuplot command file
+    write(filename,'(A,I1,A)') 'set output "plot',plot_no,'.png"'
     open(10,access = 'sequential',file = 'gplot.txt')
     ! write(10,*) 'set output "plot.eps"'
     write(10,*) 'set term png font "Fira Mono" 13'
