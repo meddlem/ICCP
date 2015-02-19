@@ -14,7 +14,8 @@ program main
   ! up_nbrs_list = number of iterations between updates of neighbor list
   real(8), parameter :: dt = 0.001d0, rc = 2.5d0, rm = 3.3d0, T_init = 1d0, & 
     rho = 0.88d0,  pi = 4d0*atan(1d0)
-  integer, parameter :: steps = 3600, N = 6**3*4, up_nbrs_list = 25
+  integer, parameter :: steps = 3600, N = 6**3*4, up_nbrs_list = 25, &
+    n_bins = 200
   logical, parameter :: prtplt = .false.
   real(8), parameter :: L = (N/rho)**(1d0/3d0)
   
@@ -28,9 +29,9 @@ program main
   ! n_nbrs = total number of neighbor pairs 
   real(8) :: r(N,3), r_init(N,3), p(N,3), p_init(N,3), F(N,3), T(steps+1), &
     E(steps+1), U(steps+1), virial(steps+1), cvv(steps+1), eq_pres, &
-    x(1000), g(1000)
+    x(n_bins), g(n_bins)
   integer :: i, start_time, end_time, nbrs_list(N*(N-1)/2,2), n_nbrs, &
-    bin(1000)
+    bin(n_bins)
   ! initialize the model:
   call init_r(r_init,L,N)
   call init_p(p_init,T_init,N)
@@ -44,8 +45,7 @@ program main
   
   ! measure initial temp, velocity correlation, energy
   call measure(E(1),U(1),T(1),p,p_init,cvv(1),r,rc,rho)
-  bin(:) = 0 !remember to remove this
-  
+
   ! time integration using the "velocity Verlet" algorithm: 
   print '(A,I5,A)', "starting simulation: ", steps, " iterations"
   call system_clock(start_time)
@@ -58,7 +58,9 @@ program main
       ! update list of neighboring particles
       call make_nbrs_list(nbrs_list,n_nbrs,r,rm,L,bin)
     endif
-    
+    if(i<100) then
+      bin(:) = 0 ! clean out bin 
+    endif
     r = r + p*dt + 0.5d0*F*(dt**2) !update positions
     r = r - floor(r/L)*L ! enforce PBC on positions
     p = p + 0.5d0*F*dt ! update momentum (1/2)
@@ -78,7 +80,9 @@ program main
   cvv = cvv/cvv(1) ! normalize velocity correlation
   U = U/N ! normalize potential energy
   eq_pres = pressure(virial,rc,T_init,rho,N) ! calculate pressure 
-    ! processing the results  
+  call radial_df(g,bin,n_bins,steps,rm)
+  
+  ! processing the results  
   if (maxval(abs(sum(p,1)))>1d-8) then
     print *, "warning: momentum not conserved"
   endif 
@@ -88,9 +92,9 @@ program main
   print *, "heat capacity =", heat_cap(E,T_init,N)
   print *, "T final: ", T(steps+1)
   print *, "U equilibrium =", U(steps+1)
-  call rdf(g,bin,rm)
+  
   ! generate final plots
-  x = dt*(/(i,i=0, 999)/)
+  x = dt*(/(i,i=0, n_bins-1)/)
   ! call gnulineplot(x,T,"time","T","","",1)
-  call gnulineplot(x,g,"time","E/N","","",2)
+  call gnulineplot(x,g,"time","g","","",2)
 end program main 

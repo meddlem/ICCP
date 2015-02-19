@@ -54,10 +54,11 @@ contains
     integer, intent(out) :: nbrs_list(:,:), n_nbrs
     integer, intent(inout) :: bin(:)
     real(8) :: dr(3), d
-    integer :: i, j, k, N
+    integer :: i, j, k, N, n_bins
     
     N = size(r,1)
     nbrs_list(N*(N-1)/2,2) = 0
+    n_bins = size(bin)
     k = 0 
 
     do i = 1,N
@@ -72,7 +73,7 @@ contains
         elseif (d<rm) then
           k = k+1
           nbrs_list(k,:) = [i, j]
-          bin(int(999*d/rm)+1) = bin(int(999*d/rm)+1) + 1
+          bin(int((n_bins-1)*d/rm)+1) = bin(int((n_bins-1)*d/rm)+1) + 1
         endif
       enddo
     enddo
