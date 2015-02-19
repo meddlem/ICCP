@@ -2,10 +2,10 @@ module plotroutines
   use plplot
   implicit none
   private
-  public :: ParticlePlot, ParticlePlotinit, gnulineplot 
+  public :: particle_plot, particle_plot_init, gnu_line_plot 
 contains
 
-  subroutine gnulineplot(x,y,xlabel,ylabel,title1,title,plot_no)
+  subroutine gnu_line_plot(x,y,xlabel,ylabel,title1,title,plot_no)
     real(8), intent(in) :: x(:), y(:)
     character(*), intent(in) :: xlabel, ylabel, title1, title
     integer, intent(in) :: plot_no
@@ -60,7 +60,7 @@ contains
     ret = system('rm xydata.dat')
   end subroutine 
 
-  subroutine ParticlePlotinit(xmin,xmax)
+  subroutine particle_plot_init(xmin,xmax)
     real(8), intent(in) :: xmin, xmax
     
     call Colors()
@@ -75,9 +75,9 @@ contains
     call plspause(.false.)
   end subroutine
  
-  subroutine ParticlePlot(r)
-    !plots all particle position
-    real(8), intent(in) :: r(:,:) !r(N,3)
+  subroutine particle_plot(r)
+    ! plots all particle position
+    real(8), intent(in) :: r(:,:) 
    
     call plclear()
     call plcol0(1) !axis color
@@ -89,7 +89,7 @@ contains
   end subroutine
   
   subroutine Colors()
-    ! redefining colors
+    ! redefining plplot colors
     call plscol0(0,255,255,255)
     call plscol0(1,255,0,0)
     call plscol0(2,0,255,0)

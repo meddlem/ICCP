@@ -11,16 +11,16 @@ contains
     real(8), intent(in) :: rc, L, r(:,:)
     real(8), intent(out) :: F(:,:), U, virial
     integer, intent(in) :: nbrs_list(:,:), n_nbrs
-    real(8) :: d, dr(3)
     real(8), allocatable :: FMAT(:,:,:), VMAT(:,:), f_dot_dr(:,:)
+    real(8) :: d, dr(3)
     integer :: i, j, k, N
 
     ! initialize, allocate large array
     N = size(r,1)
     allocate(FMAT(N,N,3),VMAT(N,N),f_dot_dr(N,N))
-    FMAT(:,:,:) = 0d0
-    VMAT(:,:) = 0d0
-    f_dot_dr(:,:) = 0d0
+    FMAT = 0d0
+    VMAT = 0d0
+    f_dot_dr = 0d0
 
     !$omp parallel do private(d,dr)
     do k = 1,n_nbrs
@@ -37,11 +37,12 @@ contains
         f_dot_dr(i,j) = 48d0*(1d0/(d**12)-0.5d0/(d**6))
         VMAT(i,j) = 4d0*(1d0/(d**12)-1d0/(d**6))
       endif
+
       FMAT(j,i,:) = - FMAT(i,j,:) !use newton 3
     enddo
     !$omp end parallel do
     
-    ! calculate total force vectors, interaction energy
+    ! calculate total force vectors, pot. energy, virial
     F = sum(FMAT,2) 
     virial = sum(f_dot_dr) 
     U = sum(VMAT) 
@@ -58,10 +59,10 @@ contains
     
     ! initialize variables
     N = size(r,1)
-    nbrs_list(N*(N-1)/2,2) = 0
+    nbrs_list = 0
     n_bins = size(bin)
     k = 0
-    bin(:) = 0 
+    bin = 0 
 
     do i = 1,N
       do j = i+1,N
@@ -79,7 +80,7 @@ contains
         endif
       enddo
     enddo
-    
+
     n_nbrs = k !get total # of nn pairs
   end subroutine
 end module 
