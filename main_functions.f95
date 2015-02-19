@@ -62,15 +62,15 @@ contains
     heat_cap = (3d0/2d0)*N/(1 - (2d0/3d0)*sigma_u_2/(N*T_tgt**2))
   end function
 
-  subroutine radial_df(g,bin,n_bins,steps,rm)     
+  subroutine radial_df(g,bin,n_bins,steps,rho,rm)     
     ! calculates radial distribution function from bin
     integer, intent(in) :: bin(:), n_bins, steps
-    real(8), intent(in) :: rm
+    real(8), intent(in) :: rho, rm
     real(8), intent(out) :: g(n_bins)
     integer :: i
     real(8) :: rs(n_bins)
-
-    rs = (/(i,i=0,n_bins-1)/)*rm   
-    g = real(bin,kind=8)/(4d0*pi*rs**2)
+    
+    rs = rm*(/(i,i=0,n_bins-1)/)/(n_bins)   
+    g = 1d0/(steps/2)*real(bin,kind=8)/(4d0*pi*rho*rs**2)
   end subroutine 
 end module

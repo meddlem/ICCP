@@ -15,7 +15,7 @@ program main
   real(8), parameter :: dt = 0.001d0, rc = 2.5d0, rm = 3.3d0, T_init = 1d0, & 
     rho = 0.88d0,  pi = 4d0*atan(1d0)
   integer, parameter :: steps = 3600, N = 6**3*4, up_nbrs_list = 25, &
-    n_bins = 200
+    n_bins = 120
   logical, parameter :: prtplt = .false.
   real(8), parameter :: L = (N/rho)**(1d0/3d0)
   
@@ -26,16 +26,19 @@ program main
   ! E = array w. energies at every timestep, U = (..) pot. energy at (..), &
   ! virial = (..) virial at (..), cvv = (..) momentum corr. coef. at (..), &
   ! eq_pres = pressure in equilibrium, nbrs_list = (..) neighbor pairs, &
-  ! n_nbrs = total number of neighbor pairs 
+  ! n_nbrs = total number of neighbor pairs, g = radial distribution func, &
+  ! bin = bin containing pair seperations 
   real(8) :: r(N,3), r_init(N,3), p(N,3), p_init(N,3), F(N,3), T(steps+1), &
     E(steps+1), U(steps+1), virial(steps+1), cvv(steps+1), eq_pres, &
-    x(n_bins), g(n_bins)
+    x_axis(n_bins-1), t_axis(steps+1), g(n_bins)
   integer :: i, start_time, end_time, nbrs_list(N*(N-1)/2,2), n_nbrs, &
-    bin(n_bins)
+    bin(n_bins), tmp_bin(n_bins)
+  
   ! initialize the model:
+  bin(:) = 0
   call init_r(r_init,L,N)
   call init_p(p_init,T_init,N)
-  call make_nbrs_list(nbrs_list,n_nbrs,r,rm,L,bin)
+  call make_nbrs_list(nbrs_list,n_nbrs,r,rm,L,tmp_bin)
   call force(F,U(1),virial(1),r_init,rc,L,nbrs_list,n_nbrs)
   if(prtplt .eqv. .true.) then
     call ParticlePlotinit(-0.1d0*L,1.1d0*L) 
@@ -56,11 +59,12 @@ program main
     endif
     if(mod(i,up_nbrs_list)==0) then
       ! update list of neighboring particles
-      call make_nbrs_list(nbrs_list,n_nbrs,r,rm,L,bin)
+      call make_nbrs_list(nbrs_list,n_nbrs,r,rm,L,tmp_bin)
+        if(i>steps/2) then
+          bin = bin + tmp_bin
+        endif
     endif
-    if(i<100) then
-      bin(:) = 0 ! clean out bin 
-    endif
+    
     r = r + p*dt + 0.5d0*F*(dt**2) !update positions
     r = r - floor(r/L)*L ! enforce PBC on positions
     p = p + 0.5d0*F*dt ! update momentum (1/2)
@@ -80,7 +84,8 @@ program main
   cvv = cvv/cvv(1) ! normalize velocity correlation
   U = U/N ! normalize potential energy
   eq_pres = pressure(virial,rc,T_init,rho,N) ! calculate pressure 
-  call radial_df(g,bin,n_bins,steps,rm)
+  call radial_df(g,bin,n_bins,steps,rho,rm) ! calculate radial distribution&
+  ! from binned pair seperations 
   
   ! processing the results  
   if (maxval(abs(sum(p,1)))>1d-8) then
@@ -94,7 +99,8 @@ program main
   print *, "U equilibrium =", U(steps+1)
   
   ! generate final plots
-  x = dt*(/(i,i=0, n_bins-1)/)
+  x_axis = rm*(/(i,i=0, n_bins-2)/)/n_bins
+  t_axis = dt*(/(i,i=0, steps)/)
   ! call gnulineplot(x,T,"time","T","","",1)
-  call gnulineplot(x,g,"time","g","","",2)
+  call gnulineplot(x_axis,g(1:n_bins-1),"r","g","","",2)
 end program main 

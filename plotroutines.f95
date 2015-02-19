@@ -56,7 +56,6 @@ contains
 
     ! now call gnuplot and plot the curves
     ret = system('gnuplot gplot.txt')
-    ! ret = system('gpicview plot.png')
     ret = system('rm gplot.txt')
     ret = system('rm xydata.dat')
   end subroutine 

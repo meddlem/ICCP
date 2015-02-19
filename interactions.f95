@@ -52,14 +52,16 @@ contains
     ! creates a list of all particles j within range rm of particle i
     real(8), intent(in) :: r(:,:), L, rm
     integer, intent(out) :: nbrs_list(:,:), n_nbrs
-    integer, intent(inout) :: bin(:)
+    integer, intent(out) :: bin(:)
     real(8) :: dr(3), d
     integer :: i, j, k, N, n_bins
     
+    ! initialize variables
     N = size(r,1)
     nbrs_list(N*(N-1)/2,2) = 0
     n_bins = size(bin)
-    k = 0 
+    k = 0
+    bin(:) = 0 
 
     do i = 1,N
       do j = i+1,N
