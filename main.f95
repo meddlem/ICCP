@@ -95,15 +95,15 @@ program main
   U = U/N ! normalize potential energy
   D = D/(6d0*t_axis) ! "normalize" diffusion constant 
   eq_pres = pressure(virial,rc,T_init,rho,N) ! calculate pressure 
-  call radial_df(g,bin,n_bins,steps,rho,rm) ! calculate radial distribution&
+  call radial_df(g,bin,n_bins,steps,rho,rm) ! calculate radial distribution &
   ! from binned pair seperations 
   
   if (maxval(abs(sum(p,1)))>1d-8) then
     print *, "warning: momentum not conserved"
-  endif 
+  endif
+
   ! processing the results  
   print '(A,I4,A)', "runtime = ", (end_time-start_time)/1000, " s"
-  print *, "rho =", rho
   print *, "equilibrium pressure =", eq_pres
   print *, "heat capacity =", heat_cap(E,T_init,N)
   print *, "T final: ", T(steps+1)

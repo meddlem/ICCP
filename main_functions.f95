@@ -59,7 +59,8 @@ contains
     M = steps/2 
     ! calculate heat capacity, check if this is correct wrt number of steps etc
     ! heat_cap = sum((E(M:steps+1)-sum(E(M:steps+1))/steps)**2)/(M*(T_tgt**2))
-    sigma_u_2 = sum((U(M:steps+1)-sum(U(M:steps+1)/M))**2)/M
+    sigma_u_2 = sum((U(M:steps+1) - sum(U(M:steps+1)/M))**2)/M
+    ! dit is maar 1 manier, best voor constante T, niet voor constante E 
     heat_cap = (3d0/2d0)*N/(1 - (2d0/3d0)*sigma_u_2/(N*T_tgt**2))
   end function
 

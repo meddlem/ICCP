@@ -82,5 +82,4 @@ contains
     
     n_nbrs = k !get total # of nn pairs
   end subroutine
-
 end module 
