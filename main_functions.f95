@@ -5,19 +5,20 @@ module main_functions
   real(8), parameter :: pi = 4d0*atan(1d0)
 
 contains
-  subroutine measure(E,U,T,p,p_init,Cvv,r,rc,rho)
+  subroutine measure(E,U,D,T,p,p_init,Cvv,r,r_init,rc,rho)
     ! calculates energy, potential energy, Temperature, velocity correlation
-    real(8), intent(in) :: p(:,:), p_init(:,:), r(:,:), rc, rho
-    real(8), intent(out) :: E, T, Cvv
+    real(8), intent(in) :: p(:,:), p_init(:,:), r(:,:), r_init(:,:), rc, rho
+    real(8), intent(out) :: E, T, Cvv, D
     real(8), intent(inout) :: U
     real(8) :: Ek
     integer :: N
     
     N = size(r,1)
-    Ek = 0.5d0*sum(p**2)
     ! apply long range correction to potential energy
     U = U + 8d0*pi*N*rho*(1d0/(9d0*(rc**9))-1d0/(3d0*(rc**3)))
-
+    
+    Ek = 0.5d0*sum(p**2)
+    D = sum((r-r_init)**2)/N 
     T = 2d0/3d0*Ek/N
     E = U + Ek
     Cvv = sum(p*p_init)/N
