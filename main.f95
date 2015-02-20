@@ -16,7 +16,7 @@ program main
   ! E: array w. energies at every timestep 
   ! U: (..) pot. energy at (..)
   ! virial: (..) virial at (..)
-  ! cvv: (..) momentum corr. coefficient at (..)
+  ! cvv: (..) velocity correlation coefficient at (..)
   ! eq_pres: pressure in equilibrium, 
   ! nbrs_list: array containing a list of neighbor pairs
   ! n_nbrs: total number pairs in nbrs_list 
@@ -45,7 +45,7 @@ program main
   ! initialize needed vars 
   L = (N/rho)**(1._dp/3._dp)
   t_axis = dt*(/(i,i=0, steps)/)
-  x_axis = rm*(/(i,i=0, n_bins-2)/)/n_bins
+  x_axis = rm*(/(i,i=0, n_bins-1)/)/n_bins
   bin = 0
   
   ! initialize the model
@@ -53,7 +53,6 @@ program main
   call init_p(p_init,T_init)
   call make_nbrs_list(nbrs_list,n_nbrs,tmp_bin,r,L)
   call force(F,U(1),virial(1),r_init,rho,L,nbrs_list,n_nbrs)
-  print *, "test"
   if(prtplt .eqv. .true.) then
     call particle_plot_init(-0.1_dp*L,1.1_dp*L) 
   endif
@@ -115,5 +114,5 @@ program main
   
   ! generate final plots
   call gnu_line_plot(t_axis,D,"time","D","","",1)
-  call gnu_line_plot(x_axis,g(1:n_bins-1),"r","g","","",2)
+  call gnu_line_plot(x_axis,g,"r","g","","",2)
 end program main 

@@ -1,8 +1,10 @@
 module constants
   implicit none
-  ! contains all constants used in the program
+  ! module contains all constants used in the program
   ! units: eps=1, sigma=1, m=1
-
+  
+  ! dp: compiler specific kind for double precision float
+  ! lng: compiler specific kind for long integer
   ! dt: timestep 
   ! rc: lennard-jones force cutoff length
   ! rm: cutoff distance for neighbor list
@@ -23,7 +25,7 @@ module constants
   real(dp), parameter :: rm = 3.3_dp
   real(dp), parameter :: pi = 4._dp*atan(1._dp) 
   
-  integer, parameter :: steps = 20000
+  integer, parameter :: steps = 10000
   integer, parameter :: N = 6**3*4
   integer, parameter :: n_bins = 120
   integer, parameter :: up_nbrs_list = 25
