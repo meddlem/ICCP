@@ -7,8 +7,8 @@ module inits
 contains
   subroutine init_r(r,L) 
     ! gives initial positions based on FCC lattice
-    real(8), intent(in) :: L
     real(8), intent(out) :: r(N,3)
+    real(8), intent(in) :: L
     integer :: i, j, k, atom, S, M
     real(8) :: a, unitcell(4,3)
 
@@ -39,8 +39,8 @@ contains
 
   subroutine init_p(p,T_tgt)
     ! gives initial momenta based on maxwell-boltzmann dist
-    real(8),intent(in) :: T_tgt
     real(8), intent(out) :: p(N,3)
+    real(8), intent(in) :: T_tgt
     integer :: i, j
     real(8) :: Pavg(3)
 

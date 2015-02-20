@@ -9,9 +9,9 @@ contains
   subroutine force(F,U,virial,r,rho,L,nbrs_list,n_nbrs)
     ! calculates net force on each particle, total potential energy, &
     ! and the virial
+    real(8), intent(out) :: F(:,:), U, virial
     real(8), intent(in) :: L, r(:,:), rho
     integer, intent(in) :: nbrs_list(:,:), n_nbrs
-    real(8), intent(out) :: F(:,:), U, virial
     real(8), allocatable :: FMAT(:,:,:), VMAT(:,:), f_dot_dr(:,:)
     real(8) :: d, dr(3)
     integer :: i, j, k
@@ -53,8 +53,8 @@ contains
 
   subroutine make_nbrs_list(nbrs_list,n_nbrs,bin,r,L)
     ! creates a list of all particles j within distance rm of particle i
-    real(8), intent(in) :: r(:,:), L
     integer, intent(out) :: nbrs_list(:,:), n_nbrs, bin(:)
+    real(8), intent(in) :: r(:,:), L
     real(8) :: dr(3), d
     integer :: i, j, k
     

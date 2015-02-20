@@ -1,19 +1,22 @@
 module constants
   implicit none
   ! contains all constants used in the program
-
   ! units: eps=1, sigma=1, m=1
 
-  ! dt = timestep, 
-  ! rc = lennard-jones force cutoff length
-  ! steps = number of timesteps
-  ! N = number of particles in simulation
-  ! up_nbrs_list = number of iterations between each update of neighbor list
-  ! n_bins = number of bins used for determining pair correlation function
-  ! meas_start = number of timesteps before measurements start
+  ! dt: timestep 
+  ! rc: lennard-jones force cutoff length
+  ! rm: cutoff distance for neighbor list
+  ! steps: number of timesteps
+  ! N: number of particles in simulation
+  ! n_bins: number of bins used for determining pair correlation function
+  ! up_nbrs_list: number of iterations between each update of neighbor list
+  ! meas_start: number of timesteps before measurements start
+  ! n_meas: total number of measurements
+  ! prtplt: determines if particle positions are plotted during iteration
 
-  ! NOTE: IF YOU MAKE CHANGES HERE RECOMPILE ALL MODULES: "make -B" 
-  
+  ! NOTE: IF YOU MAKE ANY CHANGES HERE RECOMPILE ALL MODULES: "make -B" 
+  integer, parameter :: dp = selected_real_kind(15,307)
+
   real(8), parameter :: dt = 0.001d0 
   real(8), parameter :: rc = 2.5d0
   real(8), parameter :: rm = 3.3d0

@@ -3,8 +3,8 @@ module plotroutines
   implicit none
   private
   public :: particle_plot, particle_plot_init, gnu_line_plot 
-contains
 
+contains
   subroutine gnu_line_plot(x,y,xlabel,ylabel,title1,title,plot_no)
     real(8), intent(in) :: x(:), y(:)
     character(*), intent(in) :: xlabel, ylabel, title1, title

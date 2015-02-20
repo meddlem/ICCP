@@ -1,30 +1,29 @@
 program main
   ! modules to use 
   use constants 
-  use plplot, only : plend ! plotting library 
+  use inits ! initialize the model
   use main_functions ! additional functions and subroutines
   use plotroutines ! module for plotting particles
-  use inits ! initialize the model
   use interactions ! calculating the interaction forces and energies
+  use plplot, only : plend ! plotting library 
   implicit none
 
   ! declare variables: 
-  ! r = array containing position vectors, r_init = r(t=0)
-  ! p = array containing momentum vectors, p_init = p(t=0)
-  ! F = array w. total force vectors
-  ! T = array w. temps at every timestep 
-  ! E = array w. energies at every timestep 
-  ! U = (..) pot. energy at (..)
-  ! virial = (..) virial at (..)
-  ! cvv = (..) momentum corr. coef. at (..)
-  ! eq_pres = pressure in equilibrium, 
-  ! nbrs_list = array containing a list of neighbor pairs
-  ! n_nbrs = total number pairs in nbrs_list 
-  ! g = radial distribution function
-  ! bin = bin containing pair seperations
-  ! D = diffusion constant times 6t 
-  ! bin contains the pair seperations
-  ! start, end_time record runtime of simulation
+  ! r: (N,3) array containing position vectors, r_init = r(t=0)
+  ! p: (N,3) array containing momentum vectors, p_init = p(t=0)
+  ! F: (N,3) array containing total force vectors
+  ! T: array w. temps at every timestep 
+  ! E: array w. energies at every timestep 
+  ! U: (..) pot. energy at (..)
+  ! virial: (..) virial at (..)
+  ! cvv: (..) momentum corr. coefficient at (..)
+  ! eq_pres: pressure in equilibrium, 
+  ! nbrs_list: array containing a list of neighbor pairs
+  ! n_nbrs: total number pairs in nbrs_list 
+  ! g: radial distribution function
+  ! bin: bin containing pair seperations
+  ! D: diffusion constant times 6t 
+  ! start, end_time: record runtime of simulation
 
   real(8) :: r(N,3), r_init(N,3), p(N,3), p_init(N,3), F(N,3), T(steps+1), &
     E(steps+1), U(steps+1), virial(steps+1), cvv(steps+1), eq_pres, &
@@ -38,13 +37,13 @@ program main
   write(*,'(A)',advance='no') "target temperature = " 
   read(*,*) T_init
 
-  ! calculate needed vars 
+  ! initialize needed vars 
   L = (N/rho)**(1d0/3d0)
   t_axis = dt*(/(i,i=0, steps)/)
   x_axis = rm*(/(i,i=0, n_bins-2)/)/n_bins
+  bin = 0
   
   ! initialize the model
-  bin = 0
   call init_r(r_init,L)
   call init_p(p_init,T_init)
   call make_nbrs_list(nbrs_list,n_nbrs,tmp_bin,r,L)
@@ -72,9 +71,9 @@ program main
     ! update list of neighboring particles
     if(mod(i,up_nbrs_list)==0) then
       call make_nbrs_list(nbrs_list,n_nbrs,tmp_bin,r,L)
-        if(i>meas_start) then
-          bin = bin + tmp_bin
-        endif
+      if(i>meas_start) then
+        bin = bin + tmp_bin
+      endif
     endif
     
     r = r + p*dt + 0.5d0*F*(dt**2) !update positions
@@ -91,11 +90,11 @@ program main
   call plend()
   
   ! further calculations
-  cvv = cvv/cvv(1) ! normalize velocity correlation
   U = U/N ! normalize potential energy
   D = D/(6d0*t_axis) ! "normalize" diffusion constant 
-  eq_pres = pressure(virial,T_init,rho)  
   g = radial_df(bin,rho) 
+  cvv = cvv/cvv(1) ! normalize velocity correlation
+  eq_pres = pressure(virial,T_init,rho)  
   
   ! checks 
   if (maxval(abs(sum(p,1)))>1d-8) then
@@ -106,7 +105,7 @@ program main
   print '(A,I4,A)', " runtime = ", (end_time-start_time)/1000, " s"
   print *, "equilibrium pressure =", eq_pres
   print *, "heat capacity =", heat_cap(E,T_init)
-  print *, "T final: ", T(steps+1)
+  print *, "T final =", T(steps+1)
   print *, "U equilibrium =", U(steps+1)
   print *, "D =", sum(D(meas_start:meas_start+n_meas))/n_meas 
   
