@@ -5,17 +5,14 @@ module main_functions
   real(8), parameter :: pi = 4d0*atan(1d0)
 
 contains
-  pure subroutine measure(E,U,D,T,cvv,p,p_init,r,r_init,rc,rho)
-    ! calculates energy, potential energy, Temperature, velocity correlation
-    real(8), intent(in) :: p(:,:), p_init(:,:), r(:,:), r_init(:,:), rc, rho
+  pure subroutine measure(E,U,D,T,cvv,p,p_init,r,r_init)
+    ! calculates energy, Temperature, velocity correlation, diffusion coeff 
+    real(8), intent(in) :: U, p(:,:), p_init(:,:), r(:,:), r_init(:,:)
     real(8), intent(out) :: E, T, cvv, D
-    real(8), intent(inout) :: U
     real(8) :: Ek
     integer :: N
     
     N = size(r,1)
-    ! apply long range correction to potential energy
-    U = U + 8d0*pi*N*rho*(1d0/(9d0*(rc**9))-1d0/(3d0*(rc**3)))
     
     Ek = 0.5d0*sum(p**2)
     D = sum((r-r_init)**2)/N 
@@ -66,9 +63,9 @@ contains
     pressure = 1d0 + c1 + c2
   end function 
 
-  pure real(8) function heat_cap(E,T_tgt,N,meas_start,n_meas)
+  pure real(8) function heat_cap(E,T_tgt,meas_start,n_meas)
     real(8), intent(in) :: E(:), T_tgt
-    integer, intent(in) :: N, meas_start, n_meas
+    integer, intent(in) :: meas_start, n_meas
     integer :: m, s
     real(8) :: sigma_E_2
     

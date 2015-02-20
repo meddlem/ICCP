@@ -1,6 +1,6 @@
 program main
   ! modules to use 
-  use plplot ! plotting library 
+  use plplot, only : plend ! plotting library 
   use main_functions ! additional functions and subroutines
   use plotroutines ! module for plotting particles
   use inits ! initialize the model
@@ -17,11 +17,11 @@ program main
   ! meas_start = number of timesteps before measurements start
 
   real(8), parameter :: dt = 0.001d0, rc = 2.5d0, rm = 3.3d0  
-  integer, parameter :: steps = 10000, N = 6**3*4, up_nbrs_list = 25, &
+  integer, parameter :: steps = 30000, N = 6**3*4, up_nbrs_list = 25, &
     n_bins = 120, meas_start = 1000
   logical, parameter :: prtplt = .false.
   
-  ! declare variables: 
+  ! declare local variables: 
   ! r = array containing position vectors, r_init = r(t=0)
   ! p = array containing momentum vectors, p_init = p(t=0)
   ! F = array w. total force vectors
@@ -62,7 +62,7 @@ program main
   call init_r(r_init,L,N)
   call init_p(p_init,T_init,N)
   call make_nbrs_list(nbrs_list,n_nbrs,r,rm,L,tmp_bin)
-  call force(F,U(1),virial(1),r_init,rc,L,nbrs_list,n_nbrs)
+  call force(F,U(1),virial(1),r_init,rc,rho,L,nbrs_list,n_nbrs)
   
   if(prtplt .eqv. .true.) then
     call particle_plot_init(-0.1d0*L,1.1d0*L) 
@@ -72,7 +72,7 @@ program main
   r = r_init
   
   ! measure initial temp, velocity correlation, energy
-  call measure(E(1),U(1),D(1),T(1),cvv(1),p,p_init,r,r_init,rc,rho)
+  call measure(E(1),U(1),D(1),T(1),cvv(1),p,p_init,r,r_init)
 
   ! time integration using the "velocity Verlet" algorithm: 
   print '(A,I5,A)', "starting simulation: ", steps, " iterations"
@@ -94,10 +94,10 @@ program main
     r = r + p*dt + 0.5d0*F*(dt**2) !update positions
     r = r - floor(r/L)*L ! enforce PBC on positions
     p = p + 0.5d0*F*dt ! update momentum (1/2)
-    call force(F,U(i+1),virial(i+1),r,rc,L,nbrs_list,n_nbrs) ! update force
+    call force(F,U(i+1),virial(i+1),r,rc,rho,L,nbrs_list,n_nbrs) ! update force
     p = p + 0.5d0*F*dt ! update momentum (2/2)
 
-    call measure(E(i+1),U(i+1),D(i+1),T(i+1),cvv(i+1),p,p_init,r,r_init,rc,rho)
+    call measure(E(i+1),U(i+1),D(i+1),T(i+1),cvv(i+1),p,p_init,r,r_init)
     call rescale(p,T(i+1),T_init)
   enddo
   
@@ -119,7 +119,7 @@ program main
   ! processing the results  
   print '(A,I4,A)', " runtime = ", (end_time-start_time)/1000, " s"
   print *, "equilibrium pressure =", eq_pres
-  print *, "heat capacity =", heat_cap(E,T_init,N,meas_start,n_meas)
+  print *, "heat capacity =", heat_cap(E,T_init,meas_start,n_meas)
   print *, "T final: ", T(steps+1)
   print *, "U equilibrium =", U(steps+1)
   print *, "D =", sum(D(meas_start:meas_start+n_meas))/n_meas 
