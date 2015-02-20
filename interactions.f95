@@ -7,8 +7,7 @@ module interactions
 
 contains
   subroutine force(F,U,virial,r,rho,L,nbrs_list,n_nbrs)
-    ! calculates net force on each particle, total potential energy, &
-    ! and the virial
+    ! computes net force on particles, total potential energy and the virial
     real(dp), intent(out) :: F(:,:), U, virial
     real(dp), intent(in) :: L, r(:,:), rho
     integer, intent(in) :: nbrs_list(:,:), n_nbrs
@@ -29,7 +28,7 @@ contains
       j = nbrs_list(k,2)
       
       dr = r(i,:) - r(j,:) 
-      dr = dr - nint(dr/L,kind=8)*L ! implement PBC
+      dr = dr - nint(dr/L,kind=lng)*L ! implement PBC
       d = sqrt(sum(dr**2)) 
 
       if (d<rc) then ! only particle pairs with d<rc contribute to E, F
@@ -66,7 +65,7 @@ contains
     do i = 1,N
       do j = i+1,N
         dr = r(i,:) - r(j,:)
-        dr = dr - nint(dr/L,kind=8)*L
+        dr = dr - nint(dr/L,kind=lng)*L
         d = sqrt(sum(dr**2))
         
         if (d>(sqrt(3._dp)*L)) then !check

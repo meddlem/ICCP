@@ -29,7 +29,7 @@ contains
   end subroutine 
 
   pure function radial_df(bin,rho)     
-    ! calculates radial distribution function from bin
+    ! calculates radial distribution function from binned particle seperations
     integer, intent(in) :: bin(:) 
     real(dp), intent(in) :: rho
     real(dp) :: radial_df(n_bins), rs(n_bins), delta_r
@@ -39,7 +39,7 @@ contains
     delta_r = rm/n_bins ! bin size
     rs = rm*(/(i,i=0,n_bins-1)/)/(n_bins)   
 
-    radial_df = 2._dp/(rho*m*(N-1))*real(bin,kind=8)/(4._dp*pi*delta_r*rs**2)
+    radial_df = 2._dp/(rho*m*(N-1))*real(bin,kind=dp)/(4._dp*pi*delta_r*rs**2)
   end function 
   
   pure function pressure(virial,T_tgt,rho)
@@ -59,6 +59,7 @@ contains
   end function 
 
   pure function heat_cap(E,T_tgt)
+    ! calculates head capacity from measured energies
     real(dp), intent(in) :: E(:), T_tgt
     real(dp) :: heat_cap, sigma_E_2
     integer :: m, s

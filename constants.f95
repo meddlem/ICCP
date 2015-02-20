@@ -16,6 +16,7 @@ module constants
 
   ! NOTE: IF YOU MAKE ANY CHANGES HERE RECOMPILE ALL MODULES: "make -B" 
   integer, parameter :: dp = selected_real_kind(15,307)
+  integer, parameter :: lng = selected_int_kind(8)
 
   real(dp), parameter :: dt = 0.001_dp 
   real(dp), parameter :: rc = 2.5_dp
@@ -23,12 +24,11 @@ module constants
   real(dp), parameter :: pi = 4._dp*atan(1._dp) 
   
   integer, parameter :: steps = 10000
-  integer, parameter :: N = 6**3*4
+  integer, parameter :: N = 8**3*4
   integer, parameter :: n_bins = 120
   integer, parameter :: up_nbrs_list = 25
   integer, parameter :: meas_start = 1000
   integer, parameter :: n_meas = steps + 1 - meas_start
   
   logical, parameter :: prtplt = .false.
-
 end module

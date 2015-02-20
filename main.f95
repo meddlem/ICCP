@@ -28,9 +28,9 @@ program main
   real(dp) :: r(N,3), r_init(N,3), p(N,3), p_init(N,3), F(N,3), T(steps+1), &
     E(steps+1), U(steps+1), virial(steps+1), cvv(steps+1), eq_pres, &
     x_axis(n_bins-1), t_axis(steps+1), g(n_bins), D(steps+1), L, rho, T_init
-  integer :: i, start_time, end_time, nbrs_list(N*(N-1)/2,2), n_nbrs, &
-    bin(n_bins), tmp_bin(n_bins)
-  
+  integer :: i, start_time, end_time, n_nbrs, bin(n_bins), &
+    tmp_bin(n_bins), nbrs_list(N*(N-1)/2,2) 
+
   ! get userinput 
   write(*,'(A)',advance='no') "number density = " 
   read(*,*) rho
@@ -48,11 +48,9 @@ program main
   call init_p(p_init,T_init)
   call make_nbrs_list(nbrs_list,n_nbrs,tmp_bin,r,L)
   call force(F,U(1),virial(1),r_init,rho,L,nbrs_list,n_nbrs)
-  
   if(prtplt .eqv. .true.) then
     call particle_plot_init(-0.1_dp*L,1.1_dp*L) 
   endif
-  
   p = p_init 
   r = r_init
   
@@ -62,12 +60,12 @@ program main
   ! time integration using the "velocity Verlet" algorithm: 
   print '(A,I5,A)', "starting simulation: ", steps, " iterations"
   call system_clock(start_time)
+
   do i = 1,steps
     ! plot particle positions
     if((mod(i,5)==0) .and. (prtplt .eqv. .true.)) then 
       call particle_plot(r) 
     endif
-  
     ! update list of neighboring particles
     if(mod(i,up_nbrs_list)==0) then
       call make_nbrs_list(nbrs_list,n_nbrs,tmp_bin,r,L)
@@ -76,7 +74,7 @@ program main
       endif
     endif
     
-    r = r + p*dt + 0.5_dp*F*(dt**2) !update positions
+    r = r + p*dt + 0.5_dp*F*(dt**2) ! update positions
     r = r - floor(r/L)*L ! enforce PBC on positions
     p = p + 0.5_dp*F*dt ! update momentum (1/2)
     call force(F,U(i+1),virial(i+1),r,rho,L,nbrs_list,n_nbrs) ! update force
@@ -96,7 +94,7 @@ program main
   cvv = cvv/cvv(1) ! normalize velocity correlation
   eq_pres = pressure(virial,T_init,rho)  
   
-  ! checks 
+  ! check 
   if (maxval(abs(sum(p,1)))>1d-8) then
     print *, "warning: momentum was not conserved"
   endif

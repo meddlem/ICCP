@@ -22,14 +22,14 @@ contains
 
     M = int((N/4)**(1./3.)) ! # unit cell shifts in any direction
     S = 0 
-
+    
     ! shifts the unit cell in steps of a (in x,y,z) to form an FCC lattice,&
     ! with N "atoms"
     do i = 0,M-1
       do j = 0,M-1
         do k = 0,M-1
           do atom = 1,4
-            r(atom+S,:) = unitcell(atom,:) + a*real([i,j,k],kind=8)
+            r(atom+S,:) = unitcell(atom,:) + a*real([i,j,k],kind=dp)
           enddo
           S = S+4
         enddo

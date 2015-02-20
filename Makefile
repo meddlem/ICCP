@@ -1,5 +1,5 @@
 FC = gfortran
-FFLAGS = -Wall -ffast-math -march=native -O3 -fopenmp #compiler flags
+FFLAGS = -ffast-math -Wall -march=native -O3 -fopenmp #compiler flags
 LDFLAGS = -fopenmp #link flags
 
 FFLAGS += $(shell pkg-config --cflags plplotd-f95)
