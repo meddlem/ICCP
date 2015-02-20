@@ -1,5 +1,6 @@
 program main
   ! modules to use 
+  use constants 
   use plplot, only : plend ! plotting library 
   use main_functions ! additional functions and subroutines
   use plotroutines ! module for plotting particles
@@ -7,21 +8,7 @@ program main
   use interactions ! calculating the interaction forces and energies
   implicit none
 
-  ! model parameters (constants), units: eps=1, sigma=1, m=1:
-  ! dt = timestep, 
-  ! rc = lennard-jones force cutoff length
-  ! steps = number of timesteps
-  ! N = number of particles in simulation
-  ! up_nbrs_list = number of iterations between each update of neighbor list
-  ! n_bins = number of bins used for determining pair correlation function
-  ! meas_start = number of timesteps before measurements start
-
-  real(8), parameter :: dt = 0.001d0, rc = 2.5d0, rm = 3.3d0  
-  integer, parameter :: steps = 30000, N = 6**3*4, up_nbrs_list = 25, &
-    n_bins = 120, meas_start = 1000
-  logical, parameter :: prtplt = .false.
-  
-  ! declare local variables: 
+  ! declare variables: 
   ! r = array containing position vectors, r_init = r(t=0)
   ! p = array containing momentum vectors, p_init = p(t=0)
   ! F = array w. total force vectors
@@ -43,7 +30,7 @@ program main
     E(steps+1), U(steps+1), virial(steps+1), cvv(steps+1), eq_pres, &
     x_axis(n_bins-1), t_axis(steps+1), g(n_bins), D(steps+1), L, rho, T_init
   integer :: i, start_time, end_time, nbrs_list(N*(N-1)/2,2), n_nbrs, &
-    bin(n_bins), tmp_bin(n_bins), n_meas
+    bin(n_bins), tmp_bin(n_bins)
   
   ! get userinput 
   write(*,'(A)',advance='no') "number density = " 
@@ -51,18 +38,17 @@ program main
   write(*,'(A)',advance='no') "target temperature = " 
   read(*,*) T_init
 
-  ! calculate needed constants 
+  ! calculate needed vars 
   L = (N/rho)**(1d0/3d0)
-  n_meas = steps + 1 - meas_start
   t_axis = dt*(/(i,i=0, steps)/)
   x_axis = rm*(/(i,i=0, n_bins-2)/)/n_bins
   
   ! initialize the model
   bin = 0
-  call init_r(r_init,L,N)
-  call init_p(p_init,T_init,N)
-  call make_nbrs_list(nbrs_list,n_nbrs,r,rm,L,tmp_bin)
-  call force(F,U(1),virial(1),r_init,rc,rho,L,nbrs_list,n_nbrs)
+  call init_r(r_init,L)
+  call init_p(p_init,T_init)
+  call make_nbrs_list(nbrs_list,n_nbrs,tmp_bin,r,L)
+  call force(F,U(1),virial(1),r_init,rho,L,nbrs_list,n_nbrs)
   
   if(prtplt .eqv. .true.) then
     call particle_plot_init(-0.1d0*L,1.1d0*L) 
@@ -85,7 +71,7 @@ program main
   
     ! update list of neighboring particles
     if(mod(i,up_nbrs_list)==0) then
-      call make_nbrs_list(nbrs_list,n_nbrs,r,rm,L,tmp_bin)
+      call make_nbrs_list(nbrs_list,n_nbrs,tmp_bin,r,L)
         if(i>meas_start) then
           bin = bin + tmp_bin
         endif
@@ -94,7 +80,7 @@ program main
     r = r + p*dt + 0.5d0*F*(dt**2) !update positions
     r = r - floor(r/L)*L ! enforce PBC on positions
     p = p + 0.5d0*F*dt ! update momentum (1/2)
-    call force(F,U(i+1),virial(i+1),r,rc,rho,L,nbrs_list,n_nbrs) ! update force
+    call force(F,U(i+1),virial(i+1),r,rho,L,nbrs_list,n_nbrs) ! update force
     p = p + 0.5d0*F*dt ! update momentum (2/2)
 
     call measure(E(i+1),U(i+1),D(i+1),T(i+1),cvv(i+1),p,p_init,r,r_init)
@@ -108,8 +94,8 @@ program main
   cvv = cvv/cvv(1) ! normalize velocity correlation
   U = U/N ! normalize potential energy
   D = D/(6d0*t_axis) ! "normalize" diffusion constant 
-  eq_pres = pressure(virial,rc,T_init,rho,N,meas_start,n_meas)  
-  g = radial_df(bin,n_bins,rho,rm,N,n_meas,up_nbrs_list) 
+  eq_pres = pressure(virial,T_init,rho)  
+  g = radial_df(bin,rho) 
   
   ! checks 
   if (maxval(abs(sum(p,1)))>1d-8) then
@@ -119,7 +105,7 @@ program main
   ! processing the results  
   print '(A,I4,A)', " runtime = ", (end_time-start_time)/1000, " s"
   print *, "equilibrium pressure =", eq_pres
-  print *, "heat capacity =", heat_cap(E,T_init,meas_start,n_meas)
+  print *, "heat capacity =", heat_cap(E,T_init)
   print *, "T final: ", T(steps+1)
   print *, "U equilibrium =", U(steps+1)
   print *, "D =", sum(D(meas_start:meas_start+n_meas))/n_meas 

@@ -1,14 +1,13 @@
 module inits
+  use constants
   implicit none
   private
   public :: init_p, init_r
-  real(8), parameter :: pi = 4*atan(1d0) 
 
 contains
-  subroutine init_r(r,L,N) 
+  subroutine init_r(r,L) 
     ! gives initial positions based on FCC lattice
     real(8), intent(in) :: L
-    integer, intent(in) :: N
     real(8), intent(out) :: r(N,3)
     integer :: i, j, k, atom, S, M
     real(8) :: a, unitcell(4,3)
@@ -38,10 +37,9 @@ contains
     enddo
   end subroutine  
 
-  subroutine init_p(p,T_tgt,N)
+  subroutine init_p(p,T_tgt)
     ! gives initial momenta based on maxwell-boltzmann dist
     real(8),intent(in) :: T_tgt
-    integer, intent(in) :: N
     real(8), intent(out) :: p(N,3)
     integer :: i, j
     real(8) :: Pavg(3)
@@ -65,11 +63,11 @@ contains
   ! initialize random seed, taken from ICCP github
   subroutine init_random_seed()
     integer, allocatable :: seed(:)
-    integer :: i, n, un, istat, dt(8), pid, t(2), s
+    integer :: i, m, un, istat, dtime(8), pid, t(2), s
     integer(8) :: count, tms
 
-    call random_seed(size = n)
-    allocate(seed(n))
+    call random_seed(size = m)
+    allocate(seed(m))
     open(newunit=un, file="/dev/urandom", access="stream",&
       form="unformatted", action="read", status="old", &
       iostat=istat)
@@ -81,27 +79,27 @@ contains
       if (count /= 0) then
         t = transfer(count, t)
       else
-        call date_and_time(values=dt)
-        tms = (dt(1) - 1970)*365_8 * 24 * 60 * 60 * 1000 &
-          + dt(2) * 31_8 * 24 * 60 * 60 * 1000 &
-          + dt(3) * 24 * 60 * 60 * 60 * 1000 &
-          + dt(5) * 60 * 60 * 1000 &
-          + dt(6) * 60 * 1000 + dt(7) * 1000 &
-          + dt(8)
+        call date_and_time(values=dtime)
+        tms = (dtime(1) - 1970)*365_8 * 24 * 60 * 60 * 1000 &
+          + dtime(2) * 31_8 * 24 * 60 * 60 * 1000 &
+          + dtime(3) * 24 * 60 * 60 * 60 * 1000 &
+          + dtime(5) * 60 * 60 * 1000 &
+          + dtime(6) * 60 * 1000 + dtime(7) * 1000 &
+          + dtime(8)
         t = transfer(tms, t)
       end if
       s = ieor(t(1), t(2))
       pid = getpid() + 1099279 ! Add a prime
       s = ieor(s, pid)
-      if (n >= 3) then
+      if (m >= 3) then
         seed(1) = t(1) + 36269
         seed(2) = t(2) + 72551
         seed(3) = pid
-        if (n > 3) then
-          seed(4:) = s + 37 * (/ (i, i = 0, n - 4) /)
+        if (m > 3) then
+          seed(4:) = s + 37 * (/ (i, i = 0, m - 4) /)
         end if
       else
-        seed = s + 37 * (/ (i, i = 0, n - 1 ) /)
+        seed = s + 37 * (/ (i, i = 0, m - 1 ) /)
       end if
     end if
     call random_seed(put=seed)

@@ -1,23 +1,22 @@
 module interactions
+  use constants
   use omp_lib
   implicit none
   private 
   public :: force, make_nbrs_list
-  real(8), parameter :: pi = 4d0*atan(1d0)
 
 contains
-  subroutine force(F,U,virial,r,rc,rho,L,nbrs_list,n_nbrs)
+  subroutine force(F,U,virial,r,rho,L,nbrs_list,n_nbrs)
     ! calculates net force on each particle, total potential energy, &
     ! and the virial
-    real(8), intent(in) :: rc, L, r(:,:), rho
+    real(8), intent(in) :: L, r(:,:), rho
     integer, intent(in) :: nbrs_list(:,:), n_nbrs
     real(8), intent(out) :: F(:,:), U, virial
     real(8), allocatable :: FMAT(:,:,:), VMAT(:,:), f_dot_dr(:,:)
     real(8) :: d, dr(3)
-    integer :: i, j, k, N
+    integer :: i, j, k
 
     ! initialize, allocate large array
-    N = size(r,1)
     allocate(FMAT(N,N,3),VMAT(N,N),f_dot_dr(N,N))
     FMAT = 0d0
     VMAT = 0d0
@@ -52,18 +51,15 @@ contains
     deallocate(FMAT,VMAT,f_dot_dr)
   end subroutine
 
-  subroutine make_nbrs_list(nbrs_list,n_nbrs,r,rm,L,bin)
+  subroutine make_nbrs_list(nbrs_list,n_nbrs,bin,r,L)
     ! creates a list of all particles j within distance rm of particle i
-    real(8), intent(in) :: r(:,:), L, rm
-    integer, intent(out) :: nbrs_list(:,:), n_nbrs
-    integer, intent(out) :: bin(:)
+    real(8), intent(in) :: r(:,:), L
+    integer, intent(out) :: nbrs_list(:,:), n_nbrs, bin(:)
     real(8) :: dr(3), d
-    integer :: i, j, k, N, n_bins
+    integer :: i, j, k
     
     ! initialize variables
-    N = size(r,1)
     nbrs_list = 0
-    n_bins = size(bin)
     k = 0
     bin = 0 
 

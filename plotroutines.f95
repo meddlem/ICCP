@@ -10,17 +10,17 @@ contains
     character(*), intent(in) :: xlabel, ylabel, title1, title
     integer, intent(in) :: plot_no
     character(1024) :: filename
-    integer :: i, ret, n
+    integer :: i, ret, m
     real(8) :: xmin, xmax, ymin, ymax
     
-    n = size(x)
+    m = size(x)
     xmin = minval(x)
     xmax = maxval(x)
     ymin = minval(y)
     ymax = maxval(y)
 
     open(10,access = 'sequential',file = 'xydata.dat')
-    do i=1,n
+    do i=1,m
       write(10,*) x(i),y(i) ! write datapoints to file
     enddo
     close(10,status = 'keep')
@@ -45,7 +45,7 @@ contains
     write(10,*) 'set title "'//TRIM(title)//'"'
     write(10,*) 'set xlabel '//'"'//TRIM(xlabel)//'"'
     write(10,*) 'set ylabel '//'"'//TRIM(ylabel)//'"'
-    if (n>0) then
+    if (m>0) then
     write(10,*) 'plot "xydata.dat" using 1:2 with line ls 10 t "", \'
     write(10,*) &
     ' "xydata.dat" using 1:2 with line ls 1 t "'//TRIM(title1)//'", \'

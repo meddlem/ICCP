@@ -1,8 +1,8 @@
 module main_functions
+  use constants
   implicit none
   private
   public :: measure, rescale, pressure, heat_cap, radial_df
-  real(8), parameter :: pi = 4d0*atan(1d0)
 
 contains
   pure subroutine measure(E,U,D,T,cvv,p,p_init,r,r_init)
@@ -10,9 +10,6 @@ contains
     real(8), intent(in) :: U, p(:,:), p_init(:,:), r(:,:), r_init(:,:)
     real(8), intent(out) :: E, T, cvv, D
     real(8) :: Ek
-    integer :: N
-    
-    N = size(r,1)
     
     Ek = 0.5d0*sum(p**2)
     D = sum((r-r_init)**2)/N 
@@ -31,10 +28,10 @@ contains
     p = p*lambda
   end subroutine 
 
-  pure function radial_df(bin,n_bins,rho,rm,N,n_meas,up_nbrs_list)     
+  pure function radial_df(bin,rho)     
     ! calculates radial distribution function from bin
-    integer, intent(in) :: bin(:), n_bins, N, n_meas, up_nbrs_list
-    real(8), intent(in) :: rho, rm
+    integer, intent(in) :: bin(:) 
+    real(8), intent(in) :: rho
     real(8) :: radial_df(n_bins)
     integer :: i, m
     real(8) :: rs(n_bins), delta_r
@@ -46,10 +43,9 @@ contains
     radial_df = 2d0/(rho*m*(N-1))*real(bin,kind=8)/(4d0*pi*delta_r*rs**2)
   end function 
   
-  pure real(8) function pressure(virial,rc,T_tgt,rho,N,meas_start,n_meas)
+  pure real(8) function pressure(virial,T_tgt,rho)
     ! calculates equilibrium pressure from virials
-    real(8), intent(in) :: virial(:), rc, T_tgt, rho
-    integer, intent(in) :: N, meas_start, n_meas
+    real(8), intent(in) :: virial(:), T_tgt, rho
     integer :: m, s
     real(8) :: c1, c2
 
@@ -63,9 +59,8 @@ contains
     pressure = 1d0 + c1 + c2
   end function 
 
-  pure real(8) function heat_cap(E,T_tgt,meas_start,n_meas)
+  pure real(8) function heat_cap(E,T_tgt)
     real(8), intent(in) :: E(:), T_tgt
-    integer, intent(in) :: meas_start, n_meas
     integer :: m, s
     real(8) :: sigma_E_2
     
