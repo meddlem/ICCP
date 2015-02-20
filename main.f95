@@ -25,7 +25,7 @@ program main
   ! D: diffusion constant times 6t 
   ! start, end_time: record runtime of simulation
 
-  real(8) :: r(N,3), r_init(N,3), p(N,3), p_init(N,3), F(N,3), T(steps+1), &
+  real(dp) :: r(N,3), r_init(N,3), p(N,3), p_init(N,3), F(N,3), T(steps+1), &
     E(steps+1), U(steps+1), virial(steps+1), cvv(steps+1), eq_pres, &
     x_axis(n_bins-1), t_axis(steps+1), g(n_bins), D(steps+1), L, rho, T_init
   integer :: i, start_time, end_time, nbrs_list(N*(N-1)/2,2), n_nbrs, &
@@ -38,7 +38,7 @@ program main
   read(*,*) T_init
 
   ! initialize needed vars 
-  L = (N/rho)**(1d0/3d0)
+  L = (N/rho)**(1._dp/3._dp)
   t_axis = dt*(/(i,i=0, steps)/)
   x_axis = rm*(/(i,i=0, n_bins-2)/)/n_bins
   bin = 0
@@ -50,7 +50,7 @@ program main
   call force(F,U(1),virial(1),r_init,rho,L,nbrs_list,n_nbrs)
   
   if(prtplt .eqv. .true.) then
-    call particle_plot_init(-0.1d0*L,1.1d0*L) 
+    call particle_plot_init(-0.1_dp*L,1.1_dp*L) 
   endif
   
   p = p_init 
@@ -76,11 +76,11 @@ program main
       endif
     endif
     
-    r = r + p*dt + 0.5d0*F*(dt**2) !update positions
+    r = r + p*dt + 0.5_dp*F*(dt**2) !update positions
     r = r - floor(r/L)*L ! enforce PBC on positions
-    p = p + 0.5d0*F*dt ! update momentum (1/2)
+    p = p + 0.5_dp*F*dt ! update momentum (1/2)
     call force(F,U(i+1),virial(i+1),r,rho,L,nbrs_list,n_nbrs) ! update force
-    p = p + 0.5d0*F*dt ! update momentum (2/2)
+    p = p + 0.5_dp*F*dt ! update momentum (2/2)
 
     call measure(E(i+1),U(i+1),D(i+1),T(i+1),cvv(i+1),p,p_init,r,r_init)
     call rescale(p,T(i+1),T_init)
@@ -91,7 +91,7 @@ program main
   
   ! further calculations
   U = U/N ! normalize potential energy
-  D = D/(6d0*t_axis) ! "normalize" diffusion constant 
+  D = D/(6._dp*t_axis) ! "normalize" diffusion constant 
   g = radial_df(bin,rho) 
   cvv = cvv/cvv(1) ! normalize velocity correlation
   eq_pres = pressure(virial,T_init,rho)  

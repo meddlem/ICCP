@@ -17,10 +17,10 @@ module constants
   ! NOTE: IF YOU MAKE ANY CHANGES HERE RECOMPILE ALL MODULES: "make -B" 
   integer, parameter :: dp = selected_real_kind(15,307)
 
-  real(8), parameter :: dt = 0.001d0 
-  real(8), parameter :: rc = 2.5d0
-  real(8), parameter :: rm = 3.3d0
-  real(8), parameter :: pi = 4d0*atan(1d0) 
+  real(dp), parameter :: dt = 0.001_dp 
+  real(dp), parameter :: rc = 2.5_dp
+  real(dp), parameter :: rm = 3.3_dp
+  real(dp), parameter :: pi = 4._dp*atan(1._dp) 
   
   integer, parameter :: steps = 10000
   integer, parameter :: N = 6**3*4

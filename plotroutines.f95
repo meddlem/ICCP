@@ -1,4 +1,5 @@
 module plotroutines
+  use constants
   use plplot
   implicit none
   private
@@ -6,12 +7,12 @@ module plotroutines
 
 contains
   subroutine gnu_line_plot(x,y,xlabel,ylabel,title1,title,plot_no)
-    real(8), intent(in) :: x(:), y(:)
+    real(dp), intent(in) :: x(:), y(:)
     character(*), intent(in) :: xlabel, ylabel, title1, title
     integer, intent(in) :: plot_no
     character(1024) :: filename
     integer :: i, ret, m
-    real(8) :: xmin, xmax, ymin, ymax
+    real(dp) :: xmin, xmax, ymin, ymax
     
     m = size(x)
     xmin = minval(x)
@@ -38,9 +39,9 @@ contains
     write(10,*) 'set border 3 #black'
     write(10,*) 'set xtics nomirror'
     write(10,*) 'set ytics nomirror'
-    write(10,*) 'set xrange [',0d0,':',xmax+(xmax-xmin)*0.1d0,']'
+    write(10,*) 'set xrange [',0._dp,':',xmax+(xmax-xmin)*0.1_dp,']'
     write(10,*) &
-      'set yrange [',ymin-(ymax-ymin)*0.1d0,':',ymax+(ymax-ymin)*0.1d0,']'
+      'set yrange [',ymin-(ymax-ymin)*0.1_dp,':',ymax+(ymax-ymin)*0.1_dp,']'
     write(10,*) 'set key right center'
     write(10,*) 'set title "'//TRIM(title)//'"'
     write(10,*) 'set xlabel '//'"'//TRIM(xlabel)//'"'
@@ -59,7 +60,7 @@ contains
   end subroutine 
 
   subroutine particle_plot_init(xmin,xmax)
-    real(8), intent(in) :: xmin, xmax
+    real(dp), intent(in) :: xmin, xmax
     
     call Colors()
     call plsdev("xcairo")
@@ -67,20 +68,20 @@ contains
     call pladv(0)
     
     ! define viewport, world coords for the edges
-    call plvpor(0d0, 1d0, 0d0, 0.9d0)
-    call plwind(-1d0,1d0,-1d0,1.5d0)
-    call plw3d(1d0, 1d0, 1.2d0, xmin, xmax, xmin, xmax, xmin, xmax, 20d0, 45d0)
+    call plvpor(0._dp, 1._dp, 0._dp, 0.9_dp)
+    call plwind(-1._dp,1._dp,-1._dp,1.5_dp)
+    call plw3d(1._dp, 1._dp, 1.2_dp, xmin, xmax, xmin, xmax, xmin, xmax, 20._dp, 45._dp)
     call plspause(.false.)
   end subroutine
  
   subroutine particle_plot(r)
     ! plots all particle position
-    real(8), intent(in) :: r(:,:) 
+    real(dp), intent(in) :: r(:,:) 
    
     call plclear()
     call plcol0(1) !axis color
-    call plbox3("bnstu", "x", 0d0, 0, "bnstu", "y", 0d0, 0, "bcdmnstuv", "z", &
-      0d0, 0) !plots the axes etc
+    call plbox3("bnstu", "x", 0._dp, 0, "bnstu", "y", 0._dp, 0, "bcdmnstuv", "z", &
+      0._dp, 0) !plots the axes etc
     call plcol0(3) !point color
     call plpoin3(r(:,1), r(:,2), r(:,3), 4) !this plots the points
     call plflush()

@@ -7,18 +7,18 @@ module inits
 contains
   subroutine init_r(r,L) 
     ! gives initial positions based on FCC lattice
-    real(8), intent(out) :: r(N,3)
-    real(8), intent(in) :: L
+    real(dp), intent(out) :: r(N,3)
+    real(dp), intent(in) :: L
     integer :: i, j, k, atom, S, M
-    real(8) :: a, unitcell(4,3)
+    real(dp) :: a, unitcell(4,3)
 
-    unitcell(:,:) = 0d0 !initialize unitcell 
-    a = L/((N/4)**(1d0/3d0)) ! calculate lattice constant
+    unitcell(:,:) = 0._dp !initialize unitcell 
+    a = L/((N/4)**(1._dp/3._dp)) ! calculate lattice constant
 
     ! define unit cell of the FCC lattice (only nonzero coordinates) 
-    unitcell(2,1:2) = a/sqrt(2d0)
-    unitcell(3,2:3) = a/sqrt(2d0)
-    unitcell(4,1:3:2) = a/sqrt(2d0)
+    unitcell(2,1:2) = a/sqrt(2._dp)
+    unitcell(3,2:3) = a/sqrt(2._dp)
+    unitcell(4,1:3:2) = a/sqrt(2._dp)
 
     M = int((N/4)**(1./3.)) ! # unit cell shifts in any direction
     S = 0 
@@ -39,10 +39,10 @@ contains
 
   subroutine init_p(p,T_tgt)
     ! gives initial momenta based on maxwell-boltzmann dist
-    real(8), intent(out) :: p(N,3)
-    real(8), intent(in) :: T_tgt
+    real(dp), intent(out) :: p(N,3)
+    real(dp), intent(in) :: T_tgt
     integer :: i, j
-    real(8) :: Pavg(3)
+    real(dp) :: Pavg(3)
 
     call init_random_seed()
 
@@ -105,14 +105,14 @@ contains
     call random_seed(put=seed)
   end subroutine
 
-  real(8) function MB(T_tgt)
+  real(dp) function MB(T_tgt)
     ! gives random momentum (component) based on maxwell boltzmann distribution
-    real(8), intent(in) :: T_tgt
-    real(8) :: u(2), std
+    real(dp), intent(in) :: T_tgt
+    real(dp) :: u(2), std
 
     std = sqrt(T_tgt) 
     ! generate normal dist number using box-muller
     call random_number(u)
-    MB = std*sqrt(-2d0*log(u(1)))*cos(2*pi*u(2))
+    MB = std*sqrt(-2._dp*log(u(1)))*cos(2*pi*u(2))
   end function
 end module 
