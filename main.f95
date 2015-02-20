@@ -24,13 +24,18 @@ program main
   ! bin: bin containing pair seperations
   ! D: diffusion constant times 6t 
   ! start, end_time: record runtime of simulation
-
-  real(dp) :: r(N,3), r_init(N,3), p(N,3), p_init(N,3), F(N,3), T(steps+1), &
-    E(steps+1), U(steps+1), virial(steps+1), cvv(steps+1), eq_pres, &
-    x_axis(n_bins-1), t_axis(steps+1), g(n_bins), D(steps+1), L, rho, T_init
-  integer :: i, start_time, end_time, n_nbrs, bin(n_bins), &
-    tmp_bin(n_bins), nbrs_list(N*(N-1)/2,2) 
-
+  real(dp), allocatable :: r(:,:), r_init(:,:), p(:,:), p_init(:,:), F(:,:), &
+    T(:), E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), D(:)
+  integer, allocatable :: nbrs_list(:,:) 
+  real(dp) :: eq_pres, g(n_bins), L, rho, T_init
+  integer :: i, start_time, end_time, n_nbrs, bin(n_bins), tmp_bin(n_bins) 
+  
+  ! allocate large arrays
+  allocate(r(N,3),r_init(N,3),p(N,3),p_init(N,3),F(N,3))
+  allocate(T(steps+1),E(steps+1),U(steps+1),virial(steps+1),cvv(steps+1))
+  allocate(x_axis(n_bins-1),t_axis(steps+1),D(steps+1))
+  allocate(nbrs_list(N*(N-1)/2,2))
+  
   ! get userinput 
   write(*,'(A)',advance='no') "number density = " 
   read(*,*) rho
@@ -48,6 +53,7 @@ program main
   call init_p(p_init,T_init)
   call make_nbrs_list(nbrs_list,n_nbrs,tmp_bin,r,L)
   call force(F,U(1),virial(1),r_init,rho,L,nbrs_list,n_nbrs)
+  print *, "test"
   if(prtplt .eqv. .true.) then
     call particle_plot_init(-0.1_dp*L,1.1_dp*L) 
   endif

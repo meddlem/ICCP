@@ -47,7 +47,7 @@ contains
     U = sum(VMAT) 
     ! apply long range correction to U
     U = U + 8._dp*pi*N*rho*(1._dp/(9._dp*(rc**9)) - 1._dp/(3._dp*(rc**3))) 
-    deallocate(FMAT,VMAT,f_dot_dr)
+    ! deallocate(FMAT,VMAT,f_dot_dr)
   end subroutine
 
   subroutine make_nbrs_list(nbrs_list,n_nbrs,bin,r,L)
