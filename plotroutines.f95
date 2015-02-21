@@ -12,13 +12,15 @@ contains
     integer, intent(in) :: plot_no
     character(1024) :: filename
     integer :: i, ret, m
-    real(dp) :: xmin, xmax, ymin, ymax
+    real(dp) :: xmin, xmax, xrange(2), ymin, ymax, yrange(2)
     
     m = size(x)
     xmin = minval(x)
     xmax = maxval(x)
     ymin = minval(y)
     ymax = maxval(y)
+    xrange = [0._dp, xmax+(xmax-xmin)*0.1_dp]
+    yrange = [ymin-(ymax-ymin)*0.1_dp, ymax+(ymax-ymin)*0.1_dp]
 
     open(10,access = 'sequential',file = 'xydata.dat')
     do i=1,m
@@ -39,9 +41,8 @@ contains
     write(10,*) 'set border 3 #black'
     write(10,*) 'set xtics nomirror'
     write(10,*) 'set ytics nomirror'
-    write(10,*) 'set xrange [',0._dp,':',xmax+(xmax-xmin)*0.1_dp,']'
-    write(10,*) &
-      'set yrange [',ymin-(ymax-ymin)*0.1_dp,':',ymax+(ymax-ymin)*0.1_dp,']'
+    write(10,*) 'set xrange [',xrange(1),':',xrange(2),']'
+    write(10,*) 'set yrange [',yrange(1),':',yrange(2),']'
     write(10,*) 'set key right center'
     write(10,*) 'set title "'//TRIM(title)//'"'
     write(10,*) 'set xlabel '//'"'//TRIM(xlabel)//'"'

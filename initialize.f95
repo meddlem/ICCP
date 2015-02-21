@@ -1,4 +1,4 @@
-module inits
+module initialize
   use constants
   implicit none
   private

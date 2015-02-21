@@ -1,11 +1,11 @@
 program main
   ! modules to use 
   use constants 
-  use inits ! initialize the model
-  use main_functions ! additional functions and subroutines
-  use plotroutines ! module for plotting particles
-  use interactions ! calculating the interaction forces and energies
-  use plplot, only : plend ! plotting library 
+  use initialize 
+  use main_functions 
+  use plotroutines 
+  use interactions 
+  use plplot, only : plend  
   implicit none
 
   ! declare variables: 
@@ -25,18 +25,19 @@ program main
   ! D: diffusion constant times 6t 
   ! start, end_time: record runtime of simulation
   real(dp), allocatable :: r(:,:), r_init(:,:), p(:,:), p_init(:,:), F(:,:), &
-    T(:), E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), D(:)
-  integer, allocatable :: nbrs_list(:,:) 
+    T(:), E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), r_squared(:), &
+    D(:)
+  integer, allocatable :: nbrs_list(:,:), fold_count(:,:)
   real(dp) :: eq_pres, g(n_bins), L, rho, T_init
   integer :: i, start_time, end_time, n_nbrs, bin(n_bins), tmp_bin(n_bins) 
   
   ! allocate large arrays
   allocate(r(N,3),r_init(N,3),p(N,3),p_init(N,3),F(N,3))
   allocate(T(steps+1),E(steps+1),U(steps+1),virial(steps+1),cvv(steps+1))
-  allocate(x_axis(n_bins-1),t_axis(steps+1),D(steps+1))
-  allocate(nbrs_list(N*(N-1)/2,2))
+  allocate(x_axis(n_bins-1),t_axis(steps+1),r_squared(steps+1),D(steps+1))
+  allocate(nbrs_list(N*(N-1)/2,2),fold_count(N,3))
   
-  ! get userinput 
+  ! get required userinput 
   write(*,'(A)',advance='no') "number density = " 
   read(*,*) rho
   write(*,'(A)',advance='no') "target temperature = " 
@@ -47,6 +48,7 @@ program main
   t_axis = dt*(/(i,i=0, steps)/)
   x_axis = rm*(/(i,i=0, n_bins-1)/)/n_bins
   bin = 0
+  fold_count = 0
   
   ! initialize the model
   call init_r(r_init,L)
@@ -60,7 +62,7 @@ program main
   r = r_init
   
   ! measure initial temp, velocity correlation, energy
-  call measure(E(1),U(1),D(1),T(1),cvv(1),p,p_init,r,r_init)
+  call measure(E(1),U(1),r_squared(1),T(1),cvv(1),p,p_init,r,r_init,fold_count,L)
 
   ! time integration using the "velocity Verlet" algorithm: 
   print '(A,I5,A)', "starting simulation: ", steps, " iterations"
@@ -80,12 +82,13 @@ program main
     endif
     
     r = r + p*dt + 0.5_dp*F*(dt**2) ! update positions
-    r = r - floor(r/L)*L ! enforce PBC on positions
+    call fold(r,fold_count,L)
     p = p + 0.5_dp*F*dt ! update momentum (1/2)
     call force(F,U(i+1),virial(i+1),r,rho,L,nbrs_list,n_nbrs) ! update force
     p = p + 0.5_dp*F*dt ! update momentum (2/2)
-
-    call measure(E(i+1),U(i+1),D(i+1),T(i+1),cvv(i+1),p,p_init,r,r_init)
+    
+    call measure(E(i+1),U(i+1),r_squared(i+1),T(i+1),cvv(i+1),p,p_init,r,&
+      r_init,fold_count,L)
     call rescale(p,T(i+1),T_init)
   enddo
   
@@ -94,7 +97,7 @@ program main
   
   ! further calculations
   U = U/N ! normalize potential energy
-  D = D/(6._dp*t_axis) ! "normalize" diffusion constant 
+  D = diff_const(r_squared) ! calculate diffusion constant 
   g = radial_df(bin,rho) 
   cvv = cvv/cvv(1) ! normalize velocity correlation
   eq_pres = pressure(virial,T_init,rho)  
@@ -110,9 +113,9 @@ program main
   print *, "heat capacity =", heat_cap(E,T_init)
   print *, "T final =", T(steps+1)
   print *, "U equilibrium =", U(steps+1)
-  print *, "D =", sum(D(meas_start:meas_start+n_meas))/n_meas 
+  ! print *, "D =", D 
   
   ! generate final plots
-  call gnu_line_plot(t_axis,D,"time","D","","",1)
+  call gnu_line_plot(t_axis,r_squared,"time","x^2","","",1)
   call gnu_line_plot(x_axis,g,"r","g","","",2)
 end program main 

@@ -2,21 +2,42 @@ module main_functions
   use constants
   implicit none
   private
-  public :: measure, rescale, pressure, heat_cap, radial_df
+  public :: measure, fold, rescale, pressure, heat_cap, radial_df, diff_const
 
 contains
-  pure subroutine measure(E,U,D,T,cvv,p,p_init,r,r_init)
+  pure subroutine measure(E,U,r_squared,T,cvv,p,p_init,r,r_init,fold_count,L)
     ! calculates energy, Temperature, velocity correlation, diffusion coeff 
-    real(dp), intent(out) :: E, T, cvv, D
-    real(dp), intent(in) :: U, p(:,:), p_init(:,:), r(:,:), r_init(:,:)
-    real(dp) :: Ek
+    real(dp), intent(out) :: E, T, cvv, r_squared
+    real(dp), intent(in) :: U, p(:,:), p_init(:,:), r(:,:), r_init(:,:), L
+    integer, intent(in) :: fold_count(:,:)
+    real(dp) :: Ek, r_tmp(N,3)
     
+    r_tmp = unfold(r,fold_count,L)
+
     Ek = 0.5_dp*sum(p**2)
-    D = sum((r-r_init)**2)/N 
+    r_squared = sum((r_tmp-r_init)**2)/N 
     T = 2._dp/3._dp*Ek/N
     E = U + Ek
     cvv = sum(p*p_init)/N
   end subroutine 
+  
+  pure subroutine fold(r,fold_count,L)
+    ! enforce periodic BC on positions, track of number of shifts
+    real(dp), intent(inout) :: r(:,:)
+    real(dp), intent(in) :: L
+    integer, intent(inout) :: fold_count(:,:)
+
+    fold_count = fold_count + floor(r/L)
+    r = r -floor(r/L)*L
+  end subroutine
+
+  pure function unfold(r,fold_count,L)
+    real(dp), intent(in) :: r(:,:), L
+    integer, intent(in) :: fold_count(:,:)
+    real(dp) :: unfold(N,3)
+    
+    unfold = r + fold_count*L 
+  end function
 
   pure subroutine rescale(p,T,T_tgt)
     ! rescales momentum to keep temperature fixed, method by berendsen et al.
@@ -35,7 +56,7 @@ contains
     real(dp) :: radial_df(n_bins), rs(n_bins), delta_r
     integer :: i, m
 
-    m = n_meas/up_nbrs_list ! number of time points where we binned distances
+    m = n_meas/up_nbrs_list ! number of timesteps where we binned distances
     delta_r = rm/n_bins ! bin size
     rs = rm*(/(i,i=0,n_bins-1)/)/(n_bins)   
 
@@ -73,4 +94,14 @@ contains
     ! heat_cap = (3._dp/2._dp)*N/(1 - (2._dp/3._dp)*sigma_u_2/(N*T_tgt**2))
     heat_cap = 1._dp/(T_tgt**2)*sigma_E_2
   end function
+  
+  pure function diff_const(r_squared)
+    real(dp), intent(in) :: r_squared(:)
+    real(dp) :: diff_const
+    integer :: m
+    
+    m = n_meas
+    
+    diff_const = r_squared(3)/(6._dp*1) !strictly incorrect, you need te slope
+  end function 
 end module
