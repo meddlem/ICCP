@@ -2,8 +2,10 @@ module main_functions
   use constants
   implicit none
   private
-  public :: measure, fold, rescale, pressure, heat_cap, radial_df, diff_const
-
+  integer, parameter :: s = meas_start, m = n_meas
+  public :: measure, fold, rescale, pressure, heat_cap, radial_df, diff_const, &
+    blk_var 
+  
 contains
   pure subroutine measure(E,U,r_squared,T,cvv,p,p_init,r,r_init,fold_count,L)
     ! calculates energy, Temperature, velocity correlation, diffusion coeff 
@@ -20,7 +22,17 @@ contains
     E = U + Ek
     cvv = sum(p*p_init)/N
   end subroutine 
-  
+ 
+  pure subroutine rescale(p,T,T_tgt)
+    ! rescales momentum to keep temperature fixed, method by berendsen et al.
+    real(dp), intent(inout) :: p(:,:)
+    real(dp), intent(in) :: T_tgt, T
+    real(dp) :: lambda
+
+    lambda = sqrt(1._dp + 0.025_dp*(T_tgt/T-1._dp))
+    p = p*lambda
+  end subroutine  
+
   pure subroutine fold(r,fold_count,L)
     ! enforce periodic BC on positions, track of number of shifts
     real(dp), intent(inout) :: r(:,:)
@@ -39,55 +51,39 @@ contains
     unfold = r + fold_count*L 
   end function
 
-  pure subroutine rescale(p,T,T_tgt)
-    ! rescales momentum to keep temperature fixed, method by berendsen et al.
-    real(dp), intent(inout) :: p(:,:)
-    real(dp), intent(in) :: T_tgt, T
-    real(dp) :: lambda
-
-    lambda = sqrt(1._dp + 0.025_dp*(T_tgt/T-1._dp))
-    p = p*lambda
-  end subroutine 
-
   pure function radial_df(bin,rho)     
     ! calculates radial distribution function from binned particle seperations
     integer, intent(in) :: bin(:) 
     real(dp), intent(in) :: rho
     real(dp) :: radial_df(n_bins), rs(n_bins), delta_r
-    integer :: i, m
+    integer :: i, nm
 
-    m = n_meas/up_nbrs_list ! number of timesteps where we binned distances
+    nm = n_meas/up_nbrs_list ! number of timesteps where we binned distances
     delta_r = rm/n_bins ! bin size
     rs = rm*(/(i,i=0,n_bins-1)/)/(n_bins)   
 
-    radial_df = 2._dp/(rho*m*(N-1))*real(bin,kind=dp)/(4._dp*pi*delta_r*rs**2)
+    radial_df = 2._dp/(rho*nm*(N-1))*real(bin,kind=dp)/(4._dp*pi*delta_r*rs**2)
   end function 
   
   pure function pressure(virial,T_tgt,rho)
     ! calculates equilibrium pressure from virials
     real(dp), intent(in) :: virial(:), T_tgt, rho
     real(dp) :: pressure, c1, c2
-    integer :: m, s
     
-    s = meas_start
-    m = n_meas
-
-    ! correction due to virial theorem(c1), long range correction(c2)
+    ! contribution due to virial (c1), long range correction(c2)
     c1 = 1._dp/(3._dp*N*T_tgt)*sum(virial(s:s+m))/m
     c2 = ((16._dp*pi*rho)/T_tgt)*(2._dp/(9._dp*(rc**9)) - 1._dp/(3._dp*(rc**3))) 
     
     pressure = 1._dp + c1 + c2
+    ! sigma_p_2 = 
+
   end function 
 
   pure function heat_cap(E,T_tgt)
     ! calculates head capacity from measured energies
     real(dp), intent(in) :: E(:), T_tgt
     real(dp) :: heat_cap, sigma_E_2
-    integer :: m, s
     
-    s = meas_start
-    m = n_meas
-
     ! calculate heat capacity, NVT ensemble 
     ! sigma_u_2 = sum((U(s:s+m) - sum(U(s:s+m)/m))**2)/m
     sigma_E_2 = sum((E(s:s+m)-sum(E(s:s+m))/m)**2)/m
@@ -98,10 +94,22 @@ contains
   pure function diff_const(r_squared)
     real(dp), intent(in) :: r_squared(:)
     real(dp) :: diff_const
-    integer :: m
-    
-    m = n_meas
-    
-    diff_const = r_squared(3)/(6._dp*1) !strictly incorrect, you need te slope
+
+    ! calculate diffusion constant from slope of <r^2>
+    ! not exactly the proper way to do it though
+    diff_const = (r_squared(m+s) - r_squared(s))/(6._dp*m*dt) 
   end function 
+  
+  pure function blk_var(X)
+    ! calculates the block variance of the input measurement
+    real(dp), intent(in) :: X(:)
+    real(dp) :: blk_var, Avg(n_blocks)
+    integer :: j
+
+    do j = 1,(n_blocks-1)
+      Avg(j) = sum(X(n_avg*j+s+1:n_avg*(j+1)+s))/n_avg
+    enddo
+
+    blk_var = sum((Avg - sum(Avg)/n_blocks)**2)/n_blocks
+  end function
 end module

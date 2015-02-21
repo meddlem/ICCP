@@ -9,6 +9,7 @@ program main
   implicit none
 
   ! declare variables: 
+ 
   ! r: (N,3) array containing position vectors, r_init = r(t=0)
   ! p: (N,3) array containing momentum vectors, p_init = p(t=0)
   ! F: (N,3) array containing total force vectors
@@ -31,10 +32,10 @@ program main
   integer :: i, start_time, end_time, n_nbrs, bin(n_bins), tmp_bin(n_bins) 
   
   ! allocate large arrays
-  allocate(r(N,3),r_init(N,3),p(N,3),p_init(N,3),F(N,3),fold_count(N,3))
+  allocate(r(N,3),r_init(N,3),p(N,3),p_init(N,3),F(N,3))
   allocate(T(steps+1),E(steps+1),U(steps+1),virial(steps+1),cvv(steps+1))
   allocate(x_axis(n_bins-1),t_axis(steps+1),r_squared(steps+1))
-  allocate(nbrs_list(N*(N-1)/2,2))
+  allocate(nbrs_list(N*(N-1)/2,2),fold_count(N,3))
   
   ! get required userinput 
   write(*,'(A)',advance='no') "number density = " 
@@ -72,7 +73,7 @@ program main
     if((mod(i,5)==0) .and. (prtplt .eqv. .true.)) then 
       call particle_plot(r) 
     endif
-    ! update list of neighboring particles
+    ! update neighbor list
     if(mod(i,up_nbrs_list)==0) then
       call make_nbrs_list(nbrs_list,n_nbrs,tmp_bin,r,L)
       if(i>meas_start) then
@@ -81,14 +82,17 @@ program main
     endif
     
     r = r + p*dt + 0.5_dp*F*(dt**2) ! update positions
-    call fold(r,fold_count,L)
+    call fold(r,fold_count,L) ! enforce PBC
     p = p + 0.5_dp*F*dt ! update momentum (1/2)
     call force(F,U(i+1),virial(i+1),r,rho,L,nbrs_list,n_nbrs) ! update force
     p = p + 0.5_dp*F*dt ! update momentum (2/2)
     
     call measure(E(i+1),U(i+1),r_squared(i+1),T(i+1),cvv(i+1),p,p_init,r,&
       r_init,fold_count,L)
-    call rescale(p,T(i+1),T_init)
+    
+    if (rescale_T .eqv. .true.) then
+      call rescale(p,T(i+1),T_init)
+    endif
   enddo
   
   call system_clock(end_time)
@@ -106,13 +110,14 @@ program main
     print *, "warning: momentum was not conserved"
   endif
 
-  ! processing the results  
+  ! output the results  
   print '(A,I4,A)', " runtime = ", (end_time-start_time)/1000, " s"
   print *, "equilibrium pressure =", eq_pres
   print *, "heat capacity =", heat_cap(E,T_init)
   print *, "T final =", T(steps+1)
   print *, "U equilibrium =", U(steps+1)
   print *, "D =", D 
+  print *, "test =", blk_var(U)
   
   ! generate final plots
   call gnu_line_plot(t_axis,r_squared,"time","x^2","","",1)

@@ -41,8 +41,8 @@ contains
     ! gives initial momenta based on maxwell-boltzmann dist
     real(dp), intent(out) :: p(N,3)
     real(dp), intent(in) :: T_tgt
-    integer :: i, j
     real(dp) :: Pavg(3)
+    integer :: i, j
 
     call init_random_seed()
 
