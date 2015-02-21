@@ -25,17 +25,16 @@ program main
   ! D: diffusion constant times 6t 
   ! start, end_time: record runtime of simulation
   real(dp), allocatable :: r(:,:), r_init(:,:), p(:,:), p_init(:,:), F(:,:), &
-    T(:), E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), r_squared(:), &
-    D(:)
+    T(:), E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), r_squared(:)
   integer, allocatable :: nbrs_list(:,:), fold_count(:,:)
-  real(dp) :: eq_pres, g(n_bins), L, rho, T_init
+  real(dp) :: eq_pres, g(n_bins), L, rho, T_init, D
   integer :: i, start_time, end_time, n_nbrs, bin(n_bins), tmp_bin(n_bins) 
   
   ! allocate large arrays
-  allocate(r(N,3),r_init(N,3),p(N,3),p_init(N,3),F(N,3))
+  allocate(r(N,3),r_init(N,3),p(N,3),p_init(N,3),F(N,3),fold_count(N,3))
   allocate(T(steps+1),E(steps+1),U(steps+1),virial(steps+1),cvv(steps+1))
-  allocate(x_axis(n_bins-1),t_axis(steps+1),r_squared(steps+1),D(steps+1))
-  allocate(nbrs_list(N*(N-1)/2,2),fold_count(N,3))
+  allocate(x_axis(n_bins-1),t_axis(steps+1),r_squared(steps+1))
+  allocate(nbrs_list(N*(N-1)/2,2))
   
   ! get required userinput 
   write(*,'(A)',advance='no') "number density = " 
@@ -113,7 +112,7 @@ program main
   print *, "heat capacity =", heat_cap(E,T_init)
   print *, "T final =", T(steps+1)
   print *, "U equilibrium =", U(steps+1)
-  ! print *, "D =", D 
+  print *, "D =", D 
   
   ! generate final plots
   call gnu_line_plot(t_axis,r_squared,"time","x^2","","",1)
