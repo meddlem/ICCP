@@ -18,7 +18,7 @@ contains
 
     Ek = 0.5_dp*sum(p**2)
     r_squared = sum((r_tmp-r_0)**2)/N 
-    T = 2._dp/3._dp*Ek/N
+    T = 2._dp*Ek/(3._dp*(N-1))
     E = U + Ek
     cvv = sum(p*p_0)/N
   end subroutine 

@@ -94,7 +94,7 @@ program main
       call measure(E(j),U_tmp,r_squared(j),T_tmp,cvv(j),p,p_0,r,r_0,fold_count,L)
       U(j) = U_tmp
       virial(j) = virial_tmp
-      T_tmp = T(j)
+      T(j) = T_tmp
     endif
     
     if (rescale_T .eqv. .true.) then
