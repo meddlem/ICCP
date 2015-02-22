@@ -25,16 +25,16 @@ program main
   ! bin: bin containing pair seperations
   ! D: diffusion constant times 6t 
   ! start, end_time: record runtime of simulation
-  real(dp), allocatable :: r(:,:), r_init(:,:), p(:,:), p_init(:,:), F(:,:), &
+  real(dp), allocatable :: r(:,:), r_0(:,:), p(:,:), p_0(:,:), F(:,:), &
     T(:), E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), r_squared(:)
   integer, allocatable :: nbrs_list(:,:), fold_count(:,:)
-  real(dp) :: eq_pres, g(n_bins), L, rho, T_init, D
-  integer :: i, start_time, end_time, n_nbrs, bin(n_bins), tmp_bin(n_bins) 
+  real(dp) :: eq_pres, g(n_bins), L, rho, T_init, D, U_tmp, T_tmp, virial_tmp
+  integer :: i, j, start_time, end_time, n_nbrs, bin(n_bins), tmp_bin(n_bins) 
   
   ! allocate large arrays
-  allocate(r(N,3),r_init(N,3),p(N,3),p_init(N,3),F(N,3))
-  allocate(T(steps+1),E(steps+1),U(steps+1),virial(steps+1),cvv(steps+1))
-  allocate(x_axis(n_bins-1),t_axis(steps+1),r_squared(steps+1))
+  allocate(r(N,3),r_0(N,3),p(N,3),p_0(N,3),F(N,3))
+  allocate(T(n_meas),E(n_meas),U(n_meas),virial(n_meas),cvv(n_meas))
+  allocate(x_axis(n_bins-1),t_axis(n_meas),r_squared(n_meas))
   allocate(nbrs_list(N*(N-1)/2,2),fold_count(N,3))
   
   ! get required userinput 
@@ -45,53 +45,60 @@ program main
 
   ! initialize needed vars 
   L = (N/rho)**(1._dp/3._dp)
-  t_axis = dt*(/(i,i=0, steps)/)
+  t_axis = dt*(/(i,i=0, n_meas-1)/)
   x_axis = rm*(/(i,i=0, n_bins-1)/)/n_bins
   bin = 0
-  fold_count = 0
   
   ! initialize the model
-  call init_r(r_init,L)
-  call init_p(p_init,T_init)
+  call init_r(r,L)
+  call init_p(p,T_init)
   call make_nbrs_list(nbrs_list,n_nbrs,tmp_bin,r,L)
-  call force(F,U(1),virial(1),r_init,rho,L,nbrs_list,n_nbrs)
+  call force(F,U_tmp,virial_tmp,r,rho,L,nbrs_list,n_nbrs)
   if(prtplt .eqv. .true.) then
     call particle_plot_init(-0.1_dp*L,1.1_dp*L) 
   endif
-  p = p_init 
-  r = r_init
   
-  ! measure initial temp, velocity correlation, energy
-  call measure(E(1),U(1),r_squared(1),T(1),cvv(1),p,p_init,r,r_init,fold_count,L)
-
   ! time integration using the "velocity Verlet" algorithm: 
   print '(A,I5,A)', "starting simulation: ", steps, " iterations"
   call system_clock(start_time)
 
   do i = 1,steps
     ! plot particle positions
-    if((mod(i,5)==0) .and. (prtplt .eqv. .true.)) then 
+    if ((mod(i,5)==0) .and. (prtplt .eqv. .true.)) then 
       call particle_plot(r) 
     endif
     ! update neighbor list
-    if(mod(i,up_nbrs_list)==0) then
+    if (mod(i,up_nbrs_list) == 0) then
       call make_nbrs_list(nbrs_list,n_nbrs,tmp_bin,r,L)
-      if(i>meas_start) then
+      if(i>=meas_start) then
         bin = bin + tmp_bin
       endif
     endif
-    
+     
     r = r + p*dt + 0.5_dp*F*(dt**2) ! update positions
     call fold(r,fold_count,L) ! enforce PBC
     p = p + 0.5_dp*F*dt ! update momentum (1/2)
-    call force(F,U(i+1),virial(i+1),r,rho,L,nbrs_list,n_nbrs) ! update force
+    call force(F,U_tmp,virial_tmp,r,rho,L,nbrs_list,n_nbrs) ! update force
     p = p + 0.5_dp*F*dt ! update momentum (2/2)
-    
-    call measure(E(i+1),U(i+1),r_squared(i+1),T(i+1),cvv(i+1),p,p_init,r,&
-      r_init,fold_count,L)
+
+    if (i == meas_start) then
+      r_0 = r
+      p_0 = p
+      fold_count = 0
+    endif
+
+    if (i < meas_start) then
+      call measure(E(1),U_tmp,r_squared(1),T_tmp,cvv(1),p,p_0,r,r_0,fold_count,L)
+    else
+      j = i + 1 - meas_start
+      call measure(E(j),U_tmp,r_squared(j),T_tmp,cvv(j),p,p_0,r,r_0,fold_count,L)
+      U(j) = U_tmp
+      virial(j) = virial_tmp
+      T_tmp = T(j)
+    endif
     
     if (rescale_T .eqv. .true.) then
-      call rescale(p,T(i+1),T_init)
+      call rescale(p,T_tmp,T_init)
     endif
   enddo
   
@@ -114,10 +121,10 @@ program main
   print '(A,I4,A)', " runtime = ", (end_time-start_time)/1000, " s"
   print *, "equilibrium pressure =", eq_pres
   print *, "heat capacity =", heat_cap(E,T_init)
-  print *, "T final =", T(steps+1)
-  print *, "U equilibrium =", U(steps+1)
+  print *, "T final =", T(n_meas)
+  print *, "U equilibrium =", U(n_meas)
   print *, "D =", D 
-  print *, "test =", blk_var(U)
+  print *, "test =", blk_var(E/N)
   
   ! generate final plots
   call gnu_line_plot(t_axis,r_squared,"time","x^2","","",1)

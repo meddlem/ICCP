@@ -16,6 +16,8 @@ module structure:
 
 - main_functions: contains additional functions used in the main program 
 
+- main: contains the core part of simulation
+
 - plotroutines contains all subroutines used to plot particles with plplot, 
   and a subroutines for creating simple lineplots through gnuplot
 
