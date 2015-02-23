@@ -46,7 +46,7 @@ contains
     virial = sum(f_dot_dr) 
     U = sum(VMAT) 
     ! apply long range correction to U
-    U = U + 8._dp*pi*N*rho*(1._dp/(9._dp*(rc**9)) - 1._dp/(3._dp*(rc**3))) 
+    U = U + 8._dp*pi*(N-1)*rho*(1._dp/(9._dp*(rc**9)) - 1._dp/(3._dp*(rc**3))) 
     deallocate(FMAT,VMAT,f_dot_dr)
   end subroutine
 
