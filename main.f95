@@ -28,7 +28,7 @@ program main
   real(dp), allocatable :: r(:,:), r_0(:,:), p(:,:), p_0(:,:), F(:,:), &
     T(:), E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), r_squared(:)
   integer, allocatable :: nbrs_list(:,:), fold_count(:,:)
-  real(dp) :: eq_pres, err_p, err_heat, heat_c, g(n_bins), L, rho, T_init, &
+  real(dp) :: eq_pres, err_p, eq_U, err_U, err_heat, heat_c, g(n_bins), L, rho, T_init, &
     D, U_tmp, T_tmp, virial_tmp
   integer :: i, j, start_time, end_time, n_nbrs, bin(n_bins), tmp_bin(n_bins) 
   
@@ -49,7 +49,10 @@ program main
   t_axis = dt*(/(i,i=0, n_meas-1)/)
   x_axis = rm*(/(i,i=0, n_bins-1)/)/n_bins
   bin = 0
-  
+  r_0 = r
+  p_0 = p
+  fold_count = 0
+
   ! initialize the model
   call init_r(r,L)
   call init_p(p,T_init)
@@ -98,7 +101,7 @@ program main
       T(j) = T_tmp
     endif
     
-    if (rescale_T .eqv. .true.) then
+    if ((rescale_T .eqv. .true.) .or. (i<meas_start)) then
       call rescale(p,T_tmp,T_init)
     endif
   enddo
@@ -107,12 +110,13 @@ program main
   call plend()
   
   ! further calculations
-  U = U/N ! normalize potential energy
   D = diff_const(r_squared) ! calculate diffusion constant 
   g = radial_df(bin,rho) 
   cvv = cvv/cvv(1) ! normalize velocity correlation
-  call heat_cap(heat_c,err_heat,E,T_init)
-  call pressure(eq_pres,err_p,virial,T_init,rho)  
+  
+  call heat_cap(heat_c,err_heat,E,T(n_meas))
+  call pressure(eq_pres,err_p,virial,T(n_meas),rho)  
+  call pot_energy(eq_U,err_U,U)
   
   ! check 
   if (maxval(abs(sum(p,1)))>1d-8) then
@@ -126,10 +130,14 @@ program main
   print *, "heat capacity =", heat_c
   print *, "err hc =", err_heat
   print *, "T final =", T(n_meas)
-  print *, "U equilibrium =", U(n_meas)
+  print *, "U equilibrium =", eq_U
+  print *, "err U =", err_U
   print *, "D =", D 
+
+  print *, "test E: ", blk_var(E/N)
+  print *, "test U: ", blk_var(U/N)
   
   ! generate final plots
-  call gnu_line_plot(t_axis,r_squared,"time","x^2","","",1)
+  call gnu_line_plot(t_axis,virial/N,"time","X","","",1)
   call gnu_line_plot(x_axis,g,"r","g","","",2)
 end program main 

@@ -4,7 +4,7 @@ module main_functions
   private
   integer, parameter :: m = n_meas
   public :: measure, fold, rescale, pressure, heat_cap, radial_df, diff_const, &
-    blk_var 
+    blk_var ,pot_energy 
   
 contains
   pure subroutine measure(E,U,r_squared,T,cvv,p,p_0,r,r_0,fold_count,L)
@@ -29,7 +29,8 @@ contains
     real(dp), intent(in) :: T_tgt, T
     real(dp) :: lambda
 
-    lambda = sqrt(1._dp + 0.025_dp*(T_tgt/T-1._dp))
+    lambda = sqrt(1._dp + 0.0025_dp*(T_tgt/T-1._dp))
+    ! lambda = sqrt(T_tgt/T)
     p = p*lambda
   end subroutine  
 
@@ -40,7 +41,7 @@ contains
     integer, intent(inout) :: fold_count(:,:)
 
     fold_count = fold_count + floor(r/L)
-    r = r -floor(r/L)*L
+    r = r - floor(r/L)*L
   end subroutine
 
   pure function unfold(r,fold_count,L)
@@ -69,15 +70,14 @@ contains
     ! calculates equilibrium pressure from virials
     real(dp), intent(out) :: eq_pres, err_p
     real(dp), intent(in) :: virial(:), T_tgt, rho
-    real(dp) :: c1(n_meas), c2, pressure_tmp(n_meas)
+    real(dp) :: c1, c2
     
     ! contribution due to virial (c1), long range correction(c2)
-    c1 = 1._dp/(3._dp*N*T_tgt)*virial
+    c1 = 1._dp/(3._dp*N*T_tgt)*sum(virial)/m
     c2 = ((16._dp*pi*rho)/T_tgt)*(2._dp/(9._dp*(rc**9))-1._dp/(3._dp*(rc**3))) 
     
-    pressure_tmp = 1._dp + c1 + c2
-    eq_pres = sum(pressure_tmp)/m
-    err_p = sqrt(blk_var(pressure_tmp)) ! calc error
+    eq_pres = 1._dp + c1 + c2
+    err_p = 1._dp/(3._dp*N*T_tgt)*sqrt(blk_var(virial)) ! calc error
   end subroutine 
 
   pure subroutine heat_cap(heat_c,err_heat,E,T_tgt)
@@ -92,6 +92,14 @@ contains
     ! heat_cap = (3._dp/2._dp)*N/(1 - (2._dp/3._dp)*sigma_u_2/(N*T_tgt**2))
     heat_c = 1._dp/(T_tgt**2)*sigma_E_2
     err_heat = 1._dp/(T_tgt**2)*sqrt(blk_var(E))
+  end subroutine
+
+  pure subroutine pot_energy(eq_U,err_U,U)
+    real(dp), intent(out) :: eq_U, err_U
+    real(dp), intent(in) :: U(:)
+    
+    eq_U = sum(U/N)/n_meas
+    err_U = sqrt(blk_var(U/N))
   end subroutine
   
   pure function diff_const(r_squared)
