@@ -32,9 +32,9 @@ module constants
   integer, parameter :: n_bins = 120
   integer, parameter :: up_nbrs_list = 25
   integer, parameter :: meas_start = 5000
-  integer, parameter :: n_avg = 40 
+  integer, parameter :: n_avg = 50 
   integer, parameter :: n_meas = steps + 1 - meas_start
-  integer, parameter :: n_blocks = n_meas/n_avg  
+  integer, parameter :: n_blocks = n_meas/n_avg
   
   logical, parameter :: prtplt = .false.
   logical, parameter :: rescale_T = .true.

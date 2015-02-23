@@ -28,7 +28,8 @@ program main
   real(dp), allocatable :: r(:,:), r_0(:,:), p(:,:), p_0(:,:), F(:,:), &
     T(:), E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), r_squared(:)
   integer, allocatable :: nbrs_list(:,:), fold_count(:,:)
-  real(dp) :: eq_pres, g(n_bins), L, rho, T_init, D, U_tmp, T_tmp, virial_tmp
+  real(dp) :: eq_pres, err_p, err_heat, heat_c, g(n_bins), L, rho, T_init, &
+    D, U_tmp, T_tmp, virial_tmp
   integer :: i, j, start_time, end_time, n_nbrs, bin(n_bins), tmp_bin(n_bins) 
   
   ! allocate large arrays
@@ -110,7 +111,8 @@ program main
   D = diff_const(r_squared) ! calculate diffusion constant 
   g = radial_df(bin,rho) 
   cvv = cvv/cvv(1) ! normalize velocity correlation
-  eq_pres = pressure(virial,T_init,rho)  
+  call heat_cap(heat_c,err_heat,E,T_init)
+  call pressure(eq_pres,err_p,virial,T_init,rho)  
   
   ! check 
   if (maxval(abs(sum(p,1)))>1d-8) then
@@ -120,11 +122,12 @@ program main
   ! output the results  
   print '(A,I4,A)', " runtime = ", (end_time-start_time)/1000, " s"
   print *, "equilibrium pressure =", eq_pres
-  print *, "heat capacity =", heat_cap(E,T_init)
+  print *, "err p =", err_p
+  print *, "heat capacity =", heat_c
+  print *, "err hc =", err_heat
   print *, "T final =", T(n_meas)
   print *, "U equilibrium =", U(n_meas)
   print *, "D =", D 
-  print *, "test =", blk_var(E/N)
   
   ! generate final plots
   call gnu_line_plot(t_axis,r_squared,"time","x^2","","",1)

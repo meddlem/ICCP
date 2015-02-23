@@ -1,9 +1,9 @@
 # ICCP
 This program is a Molecular Dynamics simulation, of an Argon gas in the NVT 
-ensemble, based on the velocity verlet algorithm. 
+ensemble, based on the Velocity Verlet algorithm. 
 
-module structure:
-- constants contains all constants used througout the simulation + definitions
+Program structure:
+- constants: contains all constants used througout the simulation + definitions
   for double/integer precision.
 
 - initialize: contains subroutines used for generating initial positions in an 

@@ -65,30 +65,34 @@ contains
     radial_df = 2._dp/(rho*n_s*(N-1))*real(bin,kind=dp)/(4._dp*pi*delta_r*rs**2)
   end function 
   
-  pure function pressure(virial,T_tgt,rho)
+  pure subroutine pressure(eq_pres,err_p,virial,T_tgt,rho)
     ! calculates equilibrium pressure from virials
+    real(dp), intent(out) :: eq_pres, err_p
     real(dp), intent(in) :: virial(:), T_tgt, rho
-    real(dp) :: pressure, c1, c2
+    real(dp) :: c1(n_meas), c2, pressure_tmp(n_meas)
     
     ! contribution due to virial (c1), long range correction(c2)
-    c1 = 1._dp/(3._dp*N*T_tgt)*sum(virial)/m
-    c2 = ((16._dp*pi*rho)/T_tgt)*(2._dp/(9._dp*(rc**9)) - 1._dp/(3._dp*(rc**3))) 
+    c1 = 1._dp/(3._dp*N*T_tgt)*virial
+    c2 = ((16._dp*pi*rho)/T_tgt)*(2._dp/(9._dp*(rc**9))-1._dp/(3._dp*(rc**3))) 
     
-    pressure = 1._dp + c1 + c2
-    ! sigma_p_2 = 
-  end function 
+    pressure_tmp = 1._dp + c1 + c2
+    eq_pres = sum(pressure_tmp)/m
+    err_p = sqrt(blk_var(pressure_tmp)) ! calc error
+  end subroutine 
 
-  pure function heat_cap(E,T_tgt)
+  pure subroutine heat_cap(heat_c,err_heat,E,T_tgt)
     ! calculates head capacity from measured energies
+    real(dp), intent(out) :: heat_c, err_heat
     real(dp), intent(in) :: E(:), T_tgt
-    real(dp) :: heat_cap, sigma_E_2
+    real(dp) :: sigma_E_2
     
     ! calculate heat capacity, NVT ensemble 
     ! sigma_u_2 = sum((U(s:s+m) - sum(U(s:s+m)/m))**2)/m
     sigma_E_2 = sum((E-sum(E)/m)**2)/m
     ! heat_cap = (3._dp/2._dp)*N/(1 - (2._dp/3._dp)*sigma_u_2/(N*T_tgt**2))
-    heat_cap = 1._dp/(T_tgt**2)*sigma_E_2
-  end function
+    heat_c = 1._dp/(T_tgt**2)*sigma_E_2
+    err_heat = 1._dp/(T_tgt**2)*sqrt(blk_var(E))
+  end subroutine
   
   pure function diff_const(r_squared)
     real(dp), intent(in) :: r_squared(:)
