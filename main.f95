@@ -25,18 +25,18 @@ program main
   ! bin: bin containing pair seperations
   ! D: diffusion constant times 6t 
   ! start, end_time: record runtime of simulation
-  real(dp), allocatable :: r(:,:), r_0(:,:), p(:,:), p_0(:,:), F(:,:), &
-    T(:), E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), r_squared(:)
+  real(dp), allocatable :: r(:,:), r_0(:,:), p(:,:), p_0(:,:), F(:,:), T(:), &
+    E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), r_2(:)
   integer, allocatable :: nbrs_list(:,:), fold_count(:,:)
-  real(dp) :: eq_pres, err_p, eq_U, err_U, err_heat, heat_c, g(n_bins), L, rho, T_init, &
-    D, U_tmp, T_tmp, virial_tmp
+  real(dp) :: eq_pres, err_p, eq_U, err_U, err_heat, heat_c, g(n_bins), L, &
+    rho, T_init, D, U_tmp, T_tmp, virial_tmp, E_tmp, r_2_tmp, cvv_tmp
   integer :: i, j, start_time, end_time, n_nbrs, bin(n_bins), tmp_bin(n_bins) 
   
   ! allocate large arrays
-  allocate(r(N,3),r_0(N,3),p(N,3),p_0(N,3),F(N,3))
-  allocate(T(n_meas),E(n_meas),U(n_meas),virial(n_meas),cvv(n_meas))
-  allocate(x_axis(n_bins-1),t_axis(n_meas),r_squared(n_meas))
-  allocate(nbrs_list(N*(N-1)/2,2),fold_count(N,3))
+  allocate(r(N,3),r_0(N,3),p(N,3),p_0(N,3),F(N,3),fold_count(N,3))
+  allocate(T(n_meas),E(n_meas),U(n_meas),virial(n_meas),cvv(n_meas), &
+    t_axis(n_meas),r_2(n_meas))
+  allocate(x_axis(n_bins-1),nbrs_list(N*(N-1)/2,2))
   
   ! get required userinput 
   write(*,'(A)',advance='no') "number density = " 
@@ -44,13 +44,13 @@ program main
   write(*,'(A)',advance='no') "target temperature = " 
   read(*,*) T_init
 
-  ! initialize needed vars 
+  ! initialize needed variables 
   L = (N/rho)**(1._dp/3._dp)
   t_axis = dt*(/(i,i=0, n_meas-1)/)
   x_axis = rm*(/(i,i=0, n_bins-1)/)/n_bins
   bin = 0
-  r_0 = r
-  p_0 = p
+  r_0 = 0._dp
+  p_0 = 0._dp
   fold_count = 0
 
   ! initialize the model
@@ -92,10 +92,13 @@ program main
     endif
 
     if (i < meas_start) then
-      call measure(E(1),U_tmp,r_squared(1),T_tmp,cvv(1),p,p_0,r,r_0,fold_count,L)
+      call measure(E_tmp,U_tmp,r_2_tmp,T_tmp,cvv_tmp,p,p_0,r,r_0,fold_count,L)
     else
       j = i + 1 - meas_start
-      call measure(E(j),U_tmp,r_squared(j),T_tmp,cvv(j),p,p_0,r,r_0,fold_count,L)
+      call measure(E_tmp,U_tmp,r_2_tmp,T_tmp,cvv_tmp,p,p_0,r,r_0,fold_count,L)
+      E(j) = E_tmp
+      r_2(j) = r_2_tmp
+      cvv(j) = cvv_tmp
       U(j) = U_tmp
       virial(j) = virial_tmp
       T(j) = T_tmp
@@ -110,7 +113,7 @@ program main
   call plend()
   
   ! further calculations
-  D = diff_const(r_squared) ! calculate diffusion constant 
+  D = diff_const(r_2) ! calculate diffusion constant 
   g = radial_df(bin,rho) 
   cvv = cvv/cvv(1) ! normalize velocity correlation
   call heat_cap(heat_c,err_heat,E,T(n_meas))
@@ -134,6 +137,6 @@ program main
   print *, "D =", D 
 
   ! generate final plots
-  call gnu_line_plot(t_axis,r_squared,"time","<r^2>","","",1)
+  call gnu_line_plot(t_axis,r_2,"time","<r^2>","","",1)
   call gnu_line_plot(x_axis,g,"r","g","","",2)
 end program main 
