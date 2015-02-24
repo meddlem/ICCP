@@ -31,3 +31,4 @@ main: $(OBJS)
 .PHONY: clean
 clean:
 	$(RM) $(PROG) $(OBJS) *.mod
+	$(RM) plot*.png
