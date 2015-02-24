@@ -113,7 +113,6 @@ program main
   D = diff_const(r_squared) ! calculate diffusion constant 
   g = radial_df(bin,rho) 
   cvv = cvv/cvv(1) ! normalize velocity correlation
-  
   call heat_cap(heat_c,err_heat,E,T(n_meas))
   call pressure(eq_pres,err_p,virial,T(n_meas),rho)  
   call pot_energy(eq_U,err_U,U)
@@ -135,6 +134,6 @@ program main
   print *, "D =", D 
 
   ! generate final plots
-  call gnu_line_plot(t_axis,virial/N,"time","X","","",1)
+  call gnu_line_plot(t_axis,r_squared,"time","<r^2>","","",1)
   call gnu_line_plot(x_axis,g,"r","g","","",2)
 end program main 
