@@ -71,7 +71,8 @@ contains
     ! define viewport, world coords for the edges
     call plvpor(0._dp, 1._dp, 0._dp, 0.9_dp)
     call plwind(-1._dp,1._dp,-1._dp,1.5_dp)
-    call plw3d(1._dp, 1._dp, 1.2_dp, xmin, xmax, xmin, xmax, xmin, xmax, 20._dp, 45._dp)
+    call plw3d(1._dp, 1._dp, 1.2_dp, xmin, xmax, xmin, xmax, xmin, xmax, &
+      20._dp, 45._dp)
     call plspause(.false.)
   end subroutine
  

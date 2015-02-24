@@ -3,21 +3,21 @@ module main_functions
   implicit none
   private
   integer, parameter :: m = n_meas
-  public :: measure, fold, rescale, pressure, heat_cap, radial_df, diff_const, &
-    pot_energy, meas_T 
+  public :: measure, fold, rescale, pressure, heat_cap, radial_df, &
+    diff_const, pot_energy, meas_T 
   
 contains
-  pure subroutine measure(E,U,r_squared,T,cvv,p,p_0,r,r_0,fold_count,L)
+  pure subroutine measure(E,U,r_2,cvv,p,p_0,r,r_0,T,fold_count,L)
     ! calculates energy, Temperature, velocity correlation, diffusion coeff 
-    real(dp), intent(out) :: E, cvv, r_squared
+    real(dp), intent(out) :: E, cvv, r_2
     real(dp), intent(in) :: U, T, p(:,:), p_0(:,:), r(:,:), r_0(:,:), L
     integer, intent(in) :: fold_count(:,:)
     real(dp) :: Ek, r_tmp(N,3)
     
     r_tmp = unfold(r,fold_count,L)
-
     Ek = (3._dp/2._dp)*(N-1)*T
-    r_squared = sum((r_tmp-r_0)**2)/N 
+
+    r_2 = sum((r_tmp-r_0)**2)/N 
     E = U + Ek
     cvv = sum(p*p_0)/N
   end subroutine 
@@ -29,7 +29,7 @@ contains
     meas_T = sum(p**2)/(3._dp*(N-1))
   end function
 
- pure subroutine rescale(p,T,T_tgt)
+  pure subroutine rescale(p,T,T_tgt)
     ! rescales momentum to keep temperature fixed, method by berendsen et al.
     real(dp), intent(inout) :: p(:,:)
     real(dp), intent(in) :: T_tgt, T
@@ -108,14 +108,15 @@ contains
     err_U = std_err(U/N)
   end subroutine
   
-  pure function diff_const(r_squared)
-    real(dp), intent(in) :: r_squared(:)
-    real(dp) :: diff_const
+  pure subroutine diff_const(D,err_D,r_2)
+    real(dp), intent(out) :: D, err_D
+    real(dp), intent(in) :: r_2(:)
 
     ! calculate diffusion constant from slope of <r^2>
     ! not exactly the proper way to do it though
-    diff_const = (r_squared(m) - r_squared(1))/(6._dp*m*dt) 
-  end function 
+    D = (r_2(m) - r_2(1))/(6._dp*m*dt) 
+    err_D = std_err(r_2-r_2(1))/(6._dp*m*dt) 
+  end subroutine 
   
   pure function std_err(A)
     ! calculates the block variance of the input measurement

@@ -1,10 +1,12 @@
-# ICCP
+# MD 
 This program is a Molecular Dynamics simulation, of an Argon gas in the NVT 
 ensemble, based on the Velocity Verlet algorithm. 
 
 Program structure:
 - constants: contains all constants used througout the simulation + definitions
   for double/integer precision.
+
+- io: contains all routines for userinput and output of measurement results
 
 - initialize: contains subroutines used for generating initial positions in an 
   FCC lattice, and initial velocities sampled from a maxwell-Boltzmann 
@@ -20,5 +22,3 @@ Program structure:
 
 - plotroutines contains all subroutines used to plot particles with plplot, 
   and a subroutines for creating simple lineplots through gnuplot
-
-

@@ -12,23 +12,22 @@ contains
     read(*,*) rho
     write(*,'(A)',advance='no') "target temperature = " 
     read(*,*) T_init
+    print '(A,I5,A)', "starting simulation: ", steps, " iterations"
   end subroutine
 
   subroutine results_out(runtime,eq_pres,err_p,heat_cap,err_heat, &
-      T, eq_U,err_U,D)
+      T, eq_U,err_U,D,err_D)
     real(dp), intent(in) :: eq_pres, err_p, heat_cap, err_heat, T, eq_U, &
-      err_U, D
+      err_U, D, err_D
     integer, intent(in) :: runtime
       
     print '(A,I4,A)', " runtime = ", runtime, " s"
-    print *, "equilibrium pressure =", eq_pres
-    print *, "err p =", err_p
-    print *, "heat capacity =", heat_cap
-    print *, "err hc =", err_heat
-    print *, "T final =", T
-    print *, "U equilibrium =", eq_U
-    print *, "err U =", err_U
-    print *, "D =", D 
+    print '(A,F6.3,A,F6.4)', "equilibrium pressure =", eq_pres, "±", err_p
+    print '(A,F7.1,A,F6.2)', "heat capacity =", heat_cap, "±", err_heat
+    print '(A,F6.3)', "T final =", T
+    print '(A,F7.3,A,F7.4)', "U equilibrium =", eq_U, "±", err_U
+    print '(A,F7.4,A,F7.5)', "D =", D, "±", err_D
+
   end subroutine
 
   subroutine f_check(p)
