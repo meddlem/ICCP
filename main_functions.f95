@@ -4,7 +4,7 @@ module main_functions
   private
   integer, parameter :: m = n_meas
   public :: measure, fold, rescale, pressure, heat_cap, radial_df, diff_const, &
-    blk_var ,pot_energy 
+    pot_energy 
   
 contains
   pure subroutine measure(E,U,r_squared,T,cvv,p,p_0,r,r_0,fold_count,L)
@@ -77,7 +77,7 @@ contains
     c2 = ((16._dp*pi*rho)/T_tgt)*(2._dp/(9._dp*(rc**9))-1._dp/(3._dp*(rc**3))) 
     
     eq_pres = 1._dp + c1 + c2
-    err_p = 1._dp/(3._dp*N*T_tgt)*sqrt(blk_var(virial)) ! calc error
+    err_p = 1._dp/(3._dp*N*T_tgt)*std_err(virial) ! calc error
   end subroutine 
 
   pure subroutine heat_cap(heat_c,err_heat,E,T_tgt)
@@ -91,7 +91,7 @@ contains
     sigma_E_2 = sum((E-sum(E)/m)**2)/m
     ! heat_cap = (3._dp/2._dp)*N/(1 - (2._dp/3._dp)*sigma_u_2/(N*T_tgt**2))
     heat_c = 1._dp/(T_tgt**2)*sigma_E_2
-    err_heat = 1._dp/(T_tgt**2)*sqrt(blk_var(E))
+    err_heat = 1._dp/(T_tgt**2)*std_err(E)
   end subroutine
 
   pure subroutine pot_energy(eq_U,err_U,U)
@@ -99,7 +99,7 @@ contains
     real(dp), intent(in) :: U(:)
     
     eq_U = sum(U/N)/n_meas
-    err_U = sqrt(blk_var(U/N))
+    err_U = std_err(U/N)
   end subroutine
   
   pure function diff_const(r_squared)
@@ -111,16 +111,17 @@ contains
     diff_const = (r_squared(m) - r_squared(1))/(6._dp*m*dt) 
   end function 
   
-  pure function blk_var(A)
+  pure function std_err(A)
     ! calculates the block variance of the input measurement
     real(dp), intent(in) :: A(:)
-    real(dp) :: blk_var, Avg(n_blocks)
+    real(dp) :: std_err, sigma_blocks, Avg(n_blocks)
     integer :: j
 
     do j = 0,(n_blocks-1)
       Avg(j+1) = sum(A(n_avg*j+1:n_avg*(j+1)))/n_avg
     enddo
-
-    blk_var = sum((Avg - sum(Avg)/n_blocks)**2)/n_blocks
+  
+    sigma_blocks = sum((Avg - sum(Avg)/n_blocks)**2)/(n_blocks-1)
+    std_err = sqrt(sigma_blocks/n_blocks)
   end function
 end module

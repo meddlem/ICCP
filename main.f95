@@ -134,9 +134,6 @@ program main
   print *, "err U =", err_U
   print *, "D =", D 
 
-  print *, "test E: ", blk_var(E/N)
-  print *, "test U: ", blk_var(U/N)
-  
   ! generate final plots
   call gnu_line_plot(t_axis,virial/N,"time","X","","",1)
   call gnu_line_plot(x_axis,g,"r","g","","",2)
