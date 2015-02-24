@@ -29,7 +29,7 @@ program main
     E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), r_2(:)
   integer, allocatable :: nbrs_list(:,:), fold_count(:,:)
   real(dp) :: eq_pres, err_p, eq_U, err_U, err_heat, heat_c, g(n_bins), L, &
-    rho, T_init, D, U_tmp, T_tmp, virial_tmp, E_tmp, r_2_tmp, cvv_tmp
+    rho, D, T_init, T_tmp 
   integer :: i, j, start_time, end_time, n_nbrs, bin(n_bins), tmp_bin(n_bins) 
   
   ! allocate large arrays
@@ -49,15 +49,13 @@ program main
   t_axis = dt*(/(i,i=0, n_meas-1)/)
   x_axis = rm*(/(i,i=0, n_bins-1)/)/n_bins
   bin = 0
-  r_0 = 0._dp
-  p_0 = 0._dp
-  fold_count = 0
+  j = 1
 
   ! initialize the model
   call init_r(r,L)
   call init_p(p,T_init)
   call make_nbrs_list(nbrs_list,n_nbrs,tmp_bin,r,L)
-  call force(F,U_tmp,virial_tmp,r,rho,L,nbrs_list,n_nbrs)
+  call force(F,U(j),virial(j),r,rho,L,nbrs_list,n_nbrs)
   if(prtplt .eqv. .true.) then
     call particle_plot_init(-0.1_dp*L,1.1_dp*L) 
   endif
@@ -82,25 +80,18 @@ program main
     r = r + p*dt + 0.5_dp*F*(dt**2) ! update positions
     call fold(r,fold_count,L) ! enforce PBC
     p = p + 0.5_dp*F*dt ! update momentum (1/2)
-    call force(F,U_tmp,virial_tmp,r,rho,L,nbrs_list,n_nbrs) ! update force
+    call force(F,U(j),virial(j),r,rho,L,nbrs_list,n_nbrs) ! update force
     p = p + 0.5_dp*F*dt ! update momentum (2/2)
 
     if (i == meas_start) then
-      r_0 = r
-      p_0 = p
-      fold_count = 0
+      p_0 = p; r_0 = r
     endif
 
-    if (i < meas_start) then
-      call measure(E_tmp,U_tmp,r_2_tmp,T_tmp,cvv_tmp,p,p_0,r,r_0,fold_count,L)
-    else
+    T_tmp = meas_T(p)
+
+    if (i >= meas_start) then
       j = i + 1 - meas_start
-      call measure(E_tmp,U_tmp,r_2_tmp,T_tmp,cvv_tmp,p,p_0,r,r_0,fold_count,L)
-      E(j) = E_tmp
-      r_2(j) = r_2_tmp
-      cvv(j) = cvv_tmp
-      U(j) = U_tmp
-      virial(j) = virial_tmp
+      call measure(E(j),U(j),r_2(j),T_tmp,cvv(j),p,p_0,r,r_0,fold_count,L)
       T(j) = T_tmp
     endif
     

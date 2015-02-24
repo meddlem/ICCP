@@ -4,26 +4,32 @@ module main_functions
   private
   integer, parameter :: m = n_meas
   public :: measure, fold, rescale, pressure, heat_cap, radial_df, diff_const, &
-    pot_energy 
+    pot_energy, meas_T 
   
 contains
   pure subroutine measure(E,U,r_squared,T,cvv,p,p_0,r,r_0,fold_count,L)
     ! calculates energy, Temperature, velocity correlation, diffusion coeff 
-    real(dp), intent(out) :: E, T, cvv, r_squared
-    real(dp), intent(in) :: U, p(:,:), p_0(:,:), r(:,:), r_0(:,:), L
+    real(dp), intent(out) :: E, cvv, r_squared
+    real(dp), intent(in) :: U, T, p(:,:), p_0(:,:), r(:,:), r_0(:,:), L
     integer, intent(in) :: fold_count(:,:)
     real(dp) :: Ek, r_tmp(N,3)
     
     r_tmp = unfold(r,fold_count,L)
 
-    Ek = 0.5_dp*sum(p**2)
+    Ek = (3._dp/2._dp)*(N-1)*T
     r_squared = sum((r_tmp-r_0)**2)/N 
-    T = 2._dp*Ek/(3._dp*(N-1))
     E = U + Ek
     cvv = sum(p*p_0)/N
   end subroutine 
- 
-  pure subroutine rescale(p,T,T_tgt)
+
+  pure function meas_T(p)
+    real(dp), intent(in) :: p(:,:)
+    real(dp) :: meas_T
+    
+    meas_T = sum(p**2)/(3._dp*(N-1))
+  end function
+
+ pure subroutine rescale(p,T,T_tgt)
     ! rescales momentum to keep temperature fixed, method by berendsen et al.
     real(dp), intent(inout) :: p(:,:)
     real(dp), intent(in) :: T_tgt, T
