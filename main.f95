@@ -1,6 +1,7 @@
 program main
   ! modules to use 
   use constants 
+  use io
   use initialize 
   use main_functions 
   use plotroutines 
@@ -28,9 +29,10 @@ program main
   real(dp), allocatable :: r(:,:), r_0(:,:), p(:,:), p_0(:,:), F(:,:), T(:), &
     E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), r_2(:)
   integer, allocatable :: nbrs_list(:,:), fold_count(:,:)
-  real(dp) :: eq_pres, err_p, eq_U, err_U, err_heat, heat_c, g(n_bins), L, &
+  real(dp) :: eq_pres, err_p, eq_U, err_U, err_Cv, Cv, g(n_bins), L, &
     rho, D, T_init, T_tmp 
-  integer :: i, j, start_time, end_time, n_nbrs, bin(n_bins), tmp_bin(n_bins) 
+  integer :: i, j, start_time, end_time, runtime, n_nbrs, bin(n_bins), &
+    tmp_bin(n_bins) 
   
   ! allocate large arrays
   allocate(r(N,3),r_0(N,3),p(N,3),p_0(N,3),F(N,3),fold_count(N,3))
@@ -39,10 +41,7 @@ program main
   allocate(x_axis(n_bins-1),nbrs_list(N*(N-1)/2,2))
   
   ! get required userinput 
-  write(*,'(A)',advance='no') "number density = " 
-  read(*,*) rho
-  write(*,'(A)',advance='no') "target temperature = " 
-  read(*,*) T_init
+  call user_in(rho,T_init)  
 
   ! initialize needed variables 
   L = (N/rho)**(1._dp/3._dp)
@@ -107,25 +106,16 @@ program main
   D = diff_const(r_2) ! calculate diffusion constant 
   g = radial_df(bin,rho) 
   cvv = cvv/cvv(1) ! normalize velocity correlation
-  call heat_cap(heat_c,err_heat,E,T(n_meas))
+  runtime = (end_time-start_time)/1000
+  call heat_cap(Cv,err_Cv,E,T(n_meas))
   call pressure(eq_pres,err_p,virial,T(n_meas),rho)  
   call pot_energy(eq_U,err_U,U)
   
   ! check 
-  if (maxval(abs(sum(p,1)))>1d-8) then
-    print *, "warning: momentum was not conserved"
-  endif
+  call f_check(p)
 
   ! output the results  
-  print '(A,I4,A)', " runtime = ", (end_time-start_time)/1000, " s"
-  print *, "equilibrium pressure =", eq_pres
-  print *, "err p =", err_p
-  print *, "heat capacity =", heat_c
-  print *, "err hc =", err_heat
-  print *, "T final =", T(n_meas)
-  print *, "U equilibrium =", eq_U
-  print *, "err U =", err_U
-  print *, "D =", D 
+  call results_out(runtime,eq_pres,err_p,Cv,err_Cv,T(n_meas),eq_U,err_U,D)
 
   ! generate final plots
   call gnu_line_plot(t_axis,r_2,"time","<r^2>","","",1)
