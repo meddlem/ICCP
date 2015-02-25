@@ -46,9 +46,9 @@ program main
   L = (N/rho)**(1._dp/3._dp)
   t_axis = dt*(/(i,i=0, n_meas-1)/)
   x_axis = rm*(/(i,i=0, n_bins-1)/)/n_bins
+  fold_count = 0
   bin = 0
   j = 1
-  fold_count = 0
 
   ! initialize the model
   call init_r(r,L)
@@ -78,18 +78,17 @@ program main
     T_tmp = meas_T(p)
 
     if (i == meas_start) then
-      p_0 = p; r_0 = r; 
+      p_0 = p; r_0 = r 
       fold_count = 0
     endif
 
     if (i >= meas_start) then
-    
       j = i + 1 - meas_start
       call measure(E(j),U(j),r_2(j),cvv(j),p,p_0,r,r_0,T_tmp,fold_count,L)
       T(j) = T_tmp
     endif
     
-    if (rescale_T .eqv. .true.) call rescale(p,T_tmp,T_init)
+    if ((rescale_T .eqv. .true.).or.(i<meas_start)) call rescale(p,T_tmp,T_init)
   enddo
   
   call system_clock(end_time)
@@ -101,7 +100,7 @@ program main
   call radial_df(g,bin,rho) 
   call mean_temp(mean_T,err_T,T)
   call diff_const(D,err_D,r_2,t_axis) ! calc D using linear regression fit
-  call heat_cap(Cv,err_Cv,E,T(n_meas))
+  call heat_cap(Cv,err_Cv,E,T,rescale_T)
   call pressure(eq_pres,err_p,virial,mean_T,rho)  
   call pot_energy(eq_U,err_U,U)
   
@@ -109,7 +108,8 @@ program main
   call f_check(p)
 
   ! print measurement results  
-  call results_out(runtime,eq_pres,err_p,Cv,err_Cv,mean_T,err_T,eq_U,err_U,D,err_D)
+  call results_out(runtime, eq_pres, err_p, Cv, err_Cv, mean_T, err_T, eq_U, &
+    err_U, D, err_D)
 
   ! generate final plots
   call gnu_line_plot(t_axis,r_2,"time","<r^2>","","",1)

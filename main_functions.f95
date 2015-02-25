@@ -87,19 +87,26 @@ contains
     err_p = 1._dp/(3._dp*N*T_tgt)*std_err(virial) ! calc error
   end subroutine 
 
-  pure subroutine heat_cap(heat_c,err_heat,E,T)
+  pure subroutine heat_cap(Cv,err_Cv,E,T,rescale_T)
     ! calculates head capacity from measured energies
-    real(dp), intent(out) :: heat_c, err_heat
-    real(dp), intent(in) :: E(:), T
-    real(dp) :: sigma_E_2
+    real(dp), intent(out) :: Cv, err_Cv
+    logical, intent(in) :: rescale_T
+    real(dp), intent(in) :: E(:), T(:)
+    real(dp) :: sigma_E_2, mean_T, err_T, sigma_T_2
     
-    ! calculate heat capacity, NVT ensemble 
-    ! sigma_u_2 = sum((U(s:s+m) - sum(U(s:s+m)/m))**2)/m
-
-    sigma_E_2 = sum((E-sum(E)/m)**2)/m
-    ! heat_cap = (3._dp/2._dp)*N/(1 - (2._dp/3._dp)*sigma_u_2/(N*T_tgt**2))
-    heat_c = 1._dp/(N*T**2)*sigma_E_2
-    err_heat = 1._dp/(N*T**2)*std_err((E-sum(E)/m)**2)
+    call mean_temp(mean_T,err_T,T)
+      
+    if (rescale_T .eqv. .true.) then
+      ! calculate heat capacity, NVT ensemble 
+      sigma_E_2 = sum((E-sum(E)/m)**2)/m
+      Cv = 1._dp/(N*mean_T**2)*sigma_E_2
+      err_Cv = 1._dp/(N*mean_T**2)*std_err((E-sum(E)/m)**2)
+    else 
+      ! in NVE ensemble we use the lebowitz formula instead
+      sigma_T_2 = sum((T-mean_T)**2)/m
+      Cv = 1._dp/(3._dp/2._dp - sigma_T_2/mean_T**2)
+      err_Cv = std_err((T-mean_T)**2/mean_T**2)
+    endif
   end subroutine
 
   pure subroutine pot_energy(eq_U,err_U,U)
@@ -136,6 +143,7 @@ contains
   end subroutine 
 
   pure subroutine mean_temp(T_mean,err_T,T)
+    ! calculate mean temperature and its error during measurement
     real(dp), intent(out) :: T_mean, err_T
     real(dp), intent(in) :: T(:)
     
