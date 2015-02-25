@@ -16,18 +16,17 @@ contains
   end subroutine
 
   subroutine results_out(runtime,eq_pres,err_p,heat_cap,err_heat, &
-      T, eq_U,err_U,D,err_D)
-    real(dp), intent(in) :: eq_pres, err_p, heat_cap, err_heat, T, eq_U, &
-      err_U, D, err_D
+      mean_T, err_T, eq_U,err_U,D,err_D)
+    real(dp), intent(in) :: eq_pres, err_p, heat_cap, err_heat, mean_T, &
+      err_T, eq_U, err_U, D, err_D
     integer, intent(in) :: runtime
       
     print '(A,I4,A)', " runtime = ", runtime, " s"
-    print '(A,F6.3,A,F6.4)', "equilibrium pressure =", eq_pres, "±", err_p
-    print '(A,F7.1,A,F6.2)', "heat capacity =", heat_cap, "±", err_heat
-    print *, err_heat
-    print '(A,F6.3)', "T final =", T
-    print '(A,F7.3,A,F7.4)', "U equilibrium =", eq_U, "±", err_U
-    print '(A,F7.4,A,F7.5)', "D =", D, "±", err_D
+    print '(A,F6.4,A,F6.4)', "equilibrium pressure =", eq_pres, "±", err_p
+    print '(A,F7.2,A,F6.2)', "heat capacity =", heat_cap, "±", err_heat
+    print '(A,F6.4,A,F6.4)', "T final =", mean_T, "±", err_T
+    print '(A,F7.4,A,F7.4)', "U equilibrium =", eq_U, "±", err_U
+    print '(A,F7.5,A,F7.5)', "D =", D, "±", err_D
 
   end subroutine
 

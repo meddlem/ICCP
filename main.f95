@@ -30,7 +30,7 @@ program main
     E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), r_2(:)
   integer, allocatable :: nbrs_list(:,:), fold_count(:,:)
   real(dp) :: eq_pres, err_p, eq_U, err_U, err_Cv, Cv, g(n_bins), L, &
-    rho, D, err_D, T_init, T_tmp 
+    rho, D, err_D, T_init, T_tmp, mean_T, err_T 
   integer :: i, j, start_time, end_time, runtime, n_nbrs, bin(n_bins), &
     tmp_bin(n_bins) 
   
@@ -48,6 +48,7 @@ program main
   x_axis = rm*(/(i,i=0, n_bins-1)/)/n_bins
   bin = 0
   j = 1
+  fold_count = 0
 
   ! initialize the model
   call init_r(r,L)
@@ -76,8 +77,12 @@ program main
 
     T_tmp = meas_T(p)
 
+    if (i == meas_start) then
+      p_0 = p; r_0 = r; 
+      fold_count = 0
+    endif
+
     if (i >= meas_start) then
-      if (i == meas_start) p_0 = p; r_0 = r
     
       j = i + 1 - meas_start
       call measure(E(j),U(j),r_2(j),cvv(j),p,p_0,r,r_0,T_tmp,fold_count,L)
@@ -91,19 +96,20 @@ program main
   call plend()
   
   ! further calculations
-  g = radial_df(bin,rho) 
   cvv = cvv/cvv(1) ! normalize velocity correlation
   runtime = (end_time-start_time)/1000
-  call diff_const(D,err_D,r_2) ! calculate diffusion constant 
+  call radial_df(g,bin,rho) 
+  call mean_temp(mean_T,err_T,T)
+  call diff_const(D,err_D,r_2,t_axis) ! calc D using linear regression fit
   call heat_cap(Cv,err_Cv,E,T(n_meas))
-  call pressure(eq_pres,err_p,virial,T(n_meas),rho)  
+  call pressure(eq_pres,err_p,virial,mean_T,rho)  
   call pot_energy(eq_U,err_U,U)
   
   ! check 
   call f_check(p)
 
   ! print measurement results  
-  call results_out(runtime,eq_pres,err_p,Cv,err_Cv,T(n_meas),eq_U,err_U,D,err_D)
+  call results_out(runtime,eq_pres,err_p,Cv,err_Cv,mean_T,err_T,eq_U,err_U,D,err_D)
 
   ! generate final plots
   call gnu_line_plot(t_axis,r_2,"time","<r^2>","","",1)

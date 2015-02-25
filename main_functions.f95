@@ -4,7 +4,7 @@ module main_functions
   private
   integer, parameter :: m = n_meas
   public :: measure, fold, rescale, pressure, heat_cap, radial_df, &
-    diff_const, pot_energy, meas_T 
+    diff_const, pot_energy, meas_T, mean_temp 
   
 contains
   pure subroutine measure(E,U,r_2,cvv,p,p_0,r,r_0,T,fold_count,L)
@@ -58,19 +58,20 @@ contains
     unfold = r + fold_count*L 
   end function
 
-  pure function radial_df(bin,rho)     
+  pure subroutine radial_df(g,bin,rho)     
     ! calculates radial distribution function from binned particle seperations
+    real(dp), intent(out) :: g(n_bins)
     integer, intent(in) :: bin(:) 
     real(dp), intent(in) :: rho
-    real(dp) :: radial_df(n_bins), rs(n_bins), delta_r
+    real(dp) :: rs(n_bins), delta_r
     integer :: i, n_s
 
     n_s = n_meas/up_nbrs_list ! number of timesteps where we binned distances
     delta_r = rm/n_bins ! bin size
     rs = rm*(/(i,i=0,n_bins-1)/)/(n_bins)   
 
-    radial_df = 2._dp/(rho*n_s*(N-1))*real(bin,kind=dp)/(4._dp*pi*delta_r*rs**2)
-  end function 
+    g = 2._dp/(rho*n_s*(N-1))*real(bin,kind=dp)/(4._dp*pi*delta_r*rs**2)
+  end subroutine 
   
   pure subroutine pressure(eq_pres,err_p,virial,T_tgt,rho)
     ! calculates equilibrium pressure from virials
@@ -86,10 +87,10 @@ contains
     err_p = 1._dp/(3._dp*N*T_tgt)*std_err(virial) ! calc error
   end subroutine 
 
-  pure subroutine heat_cap(heat_c,err_heat,E,T_tgt)
+  pure subroutine heat_cap(heat_c,err_heat,E,T)
     ! calculates head capacity from measured energies
     real(dp), intent(out) :: heat_c, err_heat
-    real(dp), intent(in) :: E(:), T_tgt
+    real(dp), intent(in) :: E(:), T
     real(dp) :: sigma_E_2
     
     ! calculate heat capacity, NVT ensemble 
@@ -97,8 +98,8 @@ contains
 
     sigma_E_2 = sum((E-sum(E)/m)**2)/m
     ! heat_cap = (3._dp/2._dp)*N/(1 - (2._dp/3._dp)*sigma_u_2/(N*T_tgt**2))
-    heat_c = 1._dp/(T_tgt**2)*sigma_E_2
-    err_heat = 1._dp/(T_tgt**2)*std_err((E-sum(E))**2)
+    heat_c = 1._dp/(N*T**2)*sigma_E_2
+    err_heat = 1._dp/(N*T**2)*std_err((E-sum(E)/m)**2)
   end subroutine
 
   pure subroutine pot_energy(eq_U,err_U,U)
@@ -109,15 +110,38 @@ contains
     err_U = std_err(U/N)
   end subroutine
   
-  pure subroutine diff_const(D,err_D,r_2)
+  pure subroutine diff_const(D,err_D,r_2,t)
     real(dp), intent(out) :: D, err_D
-    real(dp), intent(in) :: r_2(:)
+    real(dp), intent(in) :: r_2(:), t(:)
+    real(dp) :: slope, offset, mu_t, mu_r_2, c_t_2, c_rt, ss_rr, ss_tt, &
+      ss_rt, s
+    ! calculate diffusion constant from slope of <r^2>, using linear regression
+    ! see also: http://mathworld.wolfram.com/LeastSquaresFitting.html
 
-    ! calculate diffusion constant from slope of <r^2>
-    ! not exactly the proper way to do it though
-    D = (r_2(m) - r_2(1))/(6._dp*m*dt) 
-    err_D = std_err(r_2-r_2(1))/(6._dp*m*dt) 
+    mu_t = sum(t)/m
+    mu_r_2 = sum(r_2)/m
+    c_t_2 = sum(t**2)/m
+    c_rt = sum(r_2*t)/m
+
+    slope = (c_rt - mu_t*mu_r_2)/(c_t_2 - mu_t**2)
+    offset = mu_r_2 - slope*mu_t
+
+    ss_rr = sum((r_2 - mu_r_2)**2)
+    ss_tt = sum((t - mu_t)**2)
+    ss_rt = sum((t - mu_t)*(r_2 - mu_r_2))
+    s = sqrt((ss_rr - slope*ss_rt)/(m-2))
+
+    D = slope/6._dp 
+    err_D = s/(sqrt(ss_tt)*6._dp) ! error in slope calc
   end subroutine 
+
+  pure subroutine mean_temp(T_mean,err_T,T)
+    real(dp), intent(out) :: T_mean, err_T
+    real(dp), intent(in) :: T(:)
+    
+    T_mean = sum(T)/m
+    err_T = std_err(T)
+  end subroutine
   
   pure function std_err(A)
     ! calculates the block variance of the input measurement
