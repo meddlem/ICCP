@@ -65,7 +65,7 @@ program main
     ! update neighbor list
     if (mod(i,up_nbrs_list) == 0) then
       call make_nbrs_list(nbrs_list,n_nbrs,tmp_bin,r,L)
-      if(i>=meas_start) bin = bin + tmp_bin
+      if (i>=m_start) bin = bin + tmp_bin
     endif
      
     ! time integration using the "velocity Verlet" algorithm: 
@@ -77,18 +77,18 @@ program main
 
     T_tmp = meas_T(p)
 
-    if (i == meas_start) then
-      p_0 = p; r_0 = r 
-      fold_count = 0
-    endif
-
-    if (i >= meas_start) then
-      j = i + 1 - meas_start
+    if (i >= m_start) then
+      if (i == m_start) then
+        p_0 = p; r_0 = r 
+        fold_count = 0
+      endif
+      
+      j = i + 1 - m_start
       call measure(E(j),U(j),r_2(j),cvv(j),p,p_0,r,r_0,T_tmp,fold_count,L)
       T(j) = T_tmp
     endif
     
-    if ((rescale_T .eqv. .true.).or.(i<meas_start)) call rescale(p,T_tmp,T_init)
+    if ((rescale_T .eqv. .true.).or.(i<m_start)) call rescale(p,T_tmp,T_init)
   enddo
   
   call system_clock(end_time)

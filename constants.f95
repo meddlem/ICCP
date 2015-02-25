@@ -12,7 +12,7 @@ module constants
   ! N: number of particles in simulation
   ! n_bins: number of bins used for determining pair correlation function
   ! up_nbrs_list: number of iterations between each update of neighbor list
-  ! meas_start: number of timesteps before measurements start
+  ! m_start: number of timesteps before measurements start
   ! n_avg: number of timesteps to average over for computing stddev
   ! n_meas: total number of measurements
   ! n_blocks: number of data blocks for computing error
@@ -30,10 +30,10 @@ module constants
   integer, parameter :: steps = 40000
   integer, parameter :: N = 6**3*4
   integer, parameter :: n_bins = 120
-  integer, parameter :: up_nbrs_list = 10
-  integer, parameter :: meas_start = 5000
+  integer, parameter :: up_nbrs_list = 25
+  integer, parameter :: m_start = 5000
   integer, parameter :: n_avg = 128 
-  integer, parameter :: n_meas = steps + 1 - meas_start
+  integer, parameter :: n_meas = steps + 1 - m_start
   integer, parameter :: n_blocks = n_meas/n_avg
   
   logical, parameter :: prtplt = .false.
