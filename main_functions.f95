@@ -94,10 +94,11 @@ contains
     
     ! calculate heat capacity, NVT ensemble 
     ! sigma_u_2 = sum((U(s:s+m) - sum(U(s:s+m)/m))**2)/m
+
     sigma_E_2 = sum((E-sum(E)/m)**2)/m
     ! heat_cap = (3._dp/2._dp)*N/(1 - (2._dp/3._dp)*sigma_u_2/(N*T_tgt**2))
     heat_c = 1._dp/(T_tgt**2)*sigma_E_2
-    err_heat = 1._dp/(T_tgt**2)*std_err(E)
+    err_heat = 1._dp/(T_tgt**2)*std_err((E-sum(E))**2)
   end subroutine
 
   pure subroutine pot_energy(eq_U,err_U,U)
@@ -121,14 +122,14 @@ contains
   pure function std_err(A)
     ! calculates the block variance of the input measurement
     real(dp), intent(in) :: A(:)
-    real(dp) :: std_err, sigma_blocks, Avg(n_blocks)
+    real(dp) :: std_err, sigma_blocks_2, Avg(n_blocks)
     integer :: j
 
     do j = 0,(n_blocks-1)
       Avg(j+1) = sum(A(n_avg*j+1:n_avg*(j+1)))/n_avg
     enddo
   
-    sigma_blocks = sum((Avg - sum(Avg)/n_blocks)**2)/(n_blocks-1)
-    std_err = sqrt(sigma_blocks/n_blocks)
+    sigma_blocks_2 = sum((Avg - sum(Avg)/n_blocks)**2)/(n_blocks-1)
+    std_err = sqrt(sigma_blocks_2/n_blocks)
   end function
 end module
