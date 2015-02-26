@@ -29,7 +29,7 @@ module constants
   
   integer, parameter :: steps = 40000
   integer, parameter :: N = 6**3*4
-  integer, parameter :: n_bins = 120
+  integer, parameter :: n_bins = 128
   integer, parameter :: up_nbrs_list = 25
   integer, parameter :: m_start = 5000
   integer, parameter :: n_avg = 128 
@@ -38,4 +38,6 @@ module constants
   
   logical, parameter :: prtplt = .false.
   logical, parameter :: rescale_T = .true.
+
+  character(30), parameter :: output_format = '(A,T25,F8.4,A,F6.4)'
 end module

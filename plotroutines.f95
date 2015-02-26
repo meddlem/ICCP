@@ -23,10 +23,12 @@ contains
     endif
     
     m = size(x)
+    
     xmin = minval(x)
     xmax = maxval(x)
     ymin = minval(y1)
     ymax = maxval(y1)
+
     xrange = [0._dp, xmax+(xmax-xmin)*0.1_dp]
     yrange = [ymin-(ymax-ymin)*0.1_dp, ymax+(ymax-ymin)*0.1_dp]
 
@@ -45,6 +47,7 @@ contains
     ! create gnuplot command file
     write(filename,'(A,I1,A)') 'set output "plot',plot_no,'.png"'
     open(10,access = 'sequential',file = 'gplot.txt')
+    
     ! write(10,*) 'set output "plot.eps"'
     write(10,*) 'set term pngcairo size 640,480 enhanced font "Verdana,10"'
     write(10,*) filename
@@ -63,6 +66,7 @@ contains
     write(10,*) 'set title "'//TRIM(title)//'"'
     write(10,*) 'set xlabel '//'"'//TRIM(xlabel)//'"'
     write(10,*) 'set ylabel '//'"'//TRIM(ylabel)//'"'
+    
     if (m>0) then
       write(10,*) 'plot "xydata.dat" using 1:2 with line ls 10 t "", \'
       write(10,*) &
@@ -72,6 +76,7 @@ contains
         ' "xydata.dat" using 1:3 with line ls 2 t "'//TRIM(title1)//'"'
       endif
     endif
+    
     close(10,status = 'keep')
 
     ! now call gnuplot and plot the curves

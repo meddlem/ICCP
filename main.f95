@@ -69,7 +69,7 @@ program main
   ! central part of simulation
   do i = 1,steps
     ! plot particle positions
-    if ((mod(i,5)==0) .and. (prtplt .eqv. .true.)) call particle_plot(r) 
+    if ((mod(i,5) == 0) .and. (prtplt .eqv. .true.)) call particle_plot(r) 
     ! update neighbor list
     if (mod(i,up_nbrs_list) == 0) then
       call make_nbrs_list(nbrs_list,n_nbrs,tmp_bin,r,L)
@@ -96,7 +96,7 @@ program main
       T(j) = T_tmp
     endif
     
-    if ((rescale_T .eqv. .true.).or.(i<m_start)) call rescale(p,T_tmp,T_init)
+    if ((rescale_T .eqv. .true.).or.(i < m_start)) call rescale(p,T_tmp,T_init)
   enddo
   
   call system_clock(end_time)
@@ -104,7 +104,7 @@ program main
   
   ! further calculations
   cvv = cvv/cvv(1) ! normalize velocity correlation
-  runtime = (end_time-start_time)/1000
+  runtime = (end_time - start_time)/1000
   call radial_df(g,bin,rho) 
   call mean_temp(mean_T,err_T,T)
   call diff_const(D,err_D,r_2,t_axis) ! calc D using linear regression fit
@@ -116,8 +116,8 @@ program main
   call f_check(p)
 
   ! print measurement results  
-  call results_out(runtime, eq_pres, err_p, Cv, err_Cv, mean_T, err_T, eq_U, &
-    err_U, D, err_D)
+  call results_out(runtime, rho, T_init, eq_pres, err_p, Cv, err_Cv, mean_T, &
+    err_T, eq_U, err_U, D, err_D)
   
   ! generate final plots
   linear_ap = 6._dp*D*dt*(/(i,i=0, n_meas-1)/)

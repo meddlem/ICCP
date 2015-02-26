@@ -7,7 +7,7 @@ module main_functions
     diff_const, pot_energy, meas_T, mean_temp 
   
 contains
-  pure subroutine measure(E,U,r_2,cvv,p,p_0,r,r_0,T,fold_count,L)
+  pure subroutine measure(E, U, r_2, cvv, p, p_0, r, r_0, T, fold_count, L)
     ! calculates energy, Temperature, velocity correlation, diffusion coeff 
     real(dp), intent(out) :: E, cvv, r_2
     real(dp), intent(in) :: U, T, p(:,:), p_0(:,:), r(:,:), r_0(:,:), L
@@ -29,7 +29,7 @@ contains
     meas_T = sum(p**2)/(3._dp*(N-1))
   end function
 
-  pure subroutine rescale(p,T,T_tgt)
+  pure subroutine rescale(p, T, T_tgt)
     ! rescales momentum to keep temperature fixed, method by berendsen et al.
     real(dp), intent(inout) :: p(:,:)
     real(dp), intent(in) :: T_tgt, T
@@ -39,7 +39,7 @@ contains
     p = p*lambda
   end subroutine  
 
-  pure subroutine fold(r,fold_count,L)
+  pure subroutine fold(r, fold_count, L)
     ! enforce periodic BC on positions, track of number of shifts
     real(dp), intent(inout) :: r(:,:)
     real(dp), intent(in) :: L
@@ -49,7 +49,7 @@ contains
     r = r - floor(r/L)*L
   end subroutine
 
-  pure function unfold(r,fold_count,L)
+  pure function unfold(r, fold_count, L)
     real(dp), intent(in) :: r(:,:), L
     integer, intent(in) :: fold_count(:,:)
     real(dp) :: unfold(N,3)
@@ -57,7 +57,7 @@ contains
     unfold = r + fold_count*L 
   end function
 
-  pure subroutine radial_df(g,bin,rho)     
+  pure subroutine radial_df(g, bin, rho)     
     ! calculates radial distribution function from binned particle seperations
     real(dp), intent(out) :: g(n_bins)
     integer, intent(in) :: bin(:) 
@@ -72,7 +72,7 @@ contains
     g = 2._dp/(rho*n_s*(N-1))*real(bin,kind=dp)/(4._dp*pi*delta_r*rs**2)
   end subroutine 
   
-  pure subroutine pressure(eq_pres,err_p,virial,mean_T,rho)
+  pure subroutine pressure(eq_pres, err_p, virial, mean_T, rho)
     ! calculates equilibrium pressure from virials
     real(dp), intent(out) :: eq_pres, err_p
     real(dp), intent(in) :: virial(:), mean_T, rho
@@ -86,7 +86,7 @@ contains
     err_p = 1._dp/(3._dp*N*mean_T)*std_err(virial) ! calc error
   end subroutine 
 
-  pure subroutine heat_cap(Cv,err_Cv,E,T,rescale_T)
+  pure subroutine heat_cap(Cv, err_Cv, E, T, rescale_T)
     ! calculates head capacity from measured energies
     real(dp), intent(out) :: Cv, err_Cv
     logical, intent(in) :: rescale_T
@@ -101,17 +101,16 @@ contains
       
       Cv = 1._dp/(N*mean_T**2)*sigma_E_2
       err_Cv = 1._dp/(N*mean_T**2)*sqrt(sum(block_avg(E-sum(E)/m)**4)/n_blocks**2)
-      !sqrt((mu_E_4-sigma_E_2**2)/m)
     else 
       ! in NVE ensemble we use the lebowitz formula instead
       sigma_T_2 = sum((T-mean_T)**2)/m
 
       Cv = 1._dp/(3._dp/2._dp - sigma_T_2/mean_T**2)
-      err_Cv = std_err((T-mean_T)**2/mean_T**2)
+      err_Cv = sqrt(sum(block_avg(T-mean_T)**4)/n_blocks**2)
     endif
   end subroutine
 
-  pure subroutine pot_energy(eq_U,err_U,U)
+  pure subroutine pot_energy(eq_U, err_U, U)
     real(dp), intent(out) :: eq_U, err_U
     real(dp), intent(in) :: U(:)
     
@@ -119,7 +118,7 @@ contains
     err_U = std_err(U/N)
   end subroutine
   
-  pure subroutine diff_const(D,err_D,r_2,t)
+  pure subroutine diff_const(D, err_D, r_2, t)
     real(dp), intent(out) :: D, err_D
     real(dp), intent(in) :: r_2(:), t(:)
     real(dp) :: slope, mu_t, mu_r_2, ss_rr, ss_tt, ss_rt, s
@@ -140,7 +139,7 @@ contains
     err_D = s/(sqrt(ss_tt)*6._dp) ! error in slope calc
   end subroutine 
 
-  pure subroutine mean_temp(T_mean,err_T,T)
+  pure subroutine mean_temp(T_mean, err_T, T)
     ! calculate mean temperature and its error during measurement
     real(dp), intent(out) :: T_mean, err_T
     real(dp), intent(in) :: T(:)
@@ -154,9 +153,6 @@ contains
     real(dp), intent(in) :: A(:)
     real(dp) :: std_err, sigma_blocks_2, Avg(n_blocks)
 
-    !do j = 0,(n_blocks-1)
-    !  Avg(j+1) = sum(A(n_avg*j+1:n_avg*(j+1)))/n_avg
-    !enddo
     Avg = block_avg(A)
   
     sigma_blocks_2 = sum((Avg - sum(Avg)/n_blocks)**2)/(n_blocks-1)

@@ -6,7 +6,7 @@ module interactions
   public :: force, make_nbrs_list
 
 contains
-  subroutine force(F,U,virial,r,rho,L,nbrs_list,n_nbrs)
+  subroutine force(F, U, virial, r, rho, L, nbrs_list, n_nbrs)
     ! computes net force on particles, the total potential energy, the virial
     real(dp), intent(out) :: F(:,:), U, virial
     real(dp), intent(in) :: L, r(:,:), rho
@@ -35,9 +35,9 @@ contains
         print *, "warning: reduce dt", d
         stop
       elseif (d<rc) then ! only particle pairs with d<rc contribute to E, F
-        FMAT(i,j,:) = 48._dp*dr*(1._dp/(d**14)-0.5_dp/(d**8))
-        f_dot_dr(i,j) = 48._dp*(1._dp/(d**12)-0.5_dp/(d**6))
-        VMAT(i,j) = 4._dp*(1._dp/(d**12)-1._dp/(d**6))
+        FMAT(i,j,:) = 48._dp*dr*(1._dp/(d**14) - 0.5_dp/(d**8))
+        f_dot_dr(i,j) = 48._dp*(1._dp/(d**12) - 0.5_dp/(d**6))
+        VMAT(i,j) = 4._dp*(1._dp/(d**12) - 1._dp/(d**6))
       endif
 
       FMAT(j,i,:) = - FMAT(i,j,:) !use newton 3
@@ -53,12 +53,12 @@ contains
     deallocate(FMAT,VMAT,f_dot_dr)
   end subroutine
 
-  subroutine make_nbrs_list(nbrs_list,n_nbrs,bin,r,L)
+  pure subroutine make_nbrs_list(nbrs_list, n_nbrs, bin, r, L)
     ! creates a list of all particles j within distance rm of particle i
     integer, intent(out) :: nbrs_list(:,:), n_nbrs, bin(:)
     real(dp), intent(in) :: r(:,:), L
     real(dp) :: dr(3), d
-    integer :: i, j, k
+    integer :: i, j, k, m
     
     ! initialize variables
     nbrs_list = 0
@@ -74,7 +74,9 @@ contains
         if (d<rm) then
           k = k+1
           nbrs_list(k,:) = [i, j]
-          bin(nint(n_bins*d/rm + 0.5_dp)) = bin(nint(n_bins*d/rm + 0.5_dp)) + 1
+
+          m = nint(n_bins*d/rm + 0.5_dp)
+          bin(m) = bin(m) + 1
         endif
       enddo
     enddo
