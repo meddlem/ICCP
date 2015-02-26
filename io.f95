@@ -29,8 +29,6 @@ contains
     print '(A,F6.4,A,F6.4)', "T final = ", mean_T, " ± ", err_T
     print '(A,F7.4,A,F7.4)', "U equilibrium = ", eq_U, " ± ", err_U
     print '(A,F7.5,A,F7.5)', "D = ", D, " ± ", err_D
-
-    print *, 'test: ', err_heat
   end subroutine
 
   subroutine f_check(p)

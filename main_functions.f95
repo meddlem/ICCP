@@ -91,17 +91,17 @@ contains
     real(dp), intent(out) :: Cv, err_Cv
     logical, intent(in) :: rescale_T
     real(dp), intent(in) :: E(:), T(:)
-    real(dp) :: sigma_E_2, mean_T, err_T, sigma_T_2, mu_E_4
+    real(dp) :: sigma_E_2, mean_T, err_T, sigma_T_2
     
     call mean_temp(mean_T,err_T,T)
       
     if (rescale_T .eqv. .true.) then
-      ! calculate heat capacity, NVT ensemble 
+      ! calculate heat capacity per particle, NVT ensemble 
       sigma_E_2 = sum((E-sum(E)/m)**2)/m ! 2nd moment
-      mu_E_4 = sum((E-sum(E)/m)**4)/m ! 4th moment 
       
       Cv = 1._dp/(N*mean_T**2)*sigma_E_2
-      err_Cv = 1._dp/(N*mean_T**2)*sqrt((mu_E_4-sigma_E_2**2)/(m**2))
+      err_Cv = 1._dp/(N*mean_T**2)*sqrt(sum(block_avg(E-sum(E)/m)**4)/n_blocks**2)
+      !sqrt((mu_E_4-sigma_E_2**2)/m)
     else 
       ! in NVE ensemble we use the lebowitz formula instead
       sigma_T_2 = sum((T-mean_T)**2)/m
@@ -153,13 +153,25 @@ contains
     ! calculates the block variance of the input measurement
     real(dp), intent(in) :: A(:)
     real(dp) :: std_err, sigma_blocks_2, Avg(n_blocks)
-    integer :: j
 
-    do j = 0,(n_blocks-1)
-      Avg(j+1) = sum(A(n_avg*j+1:n_avg*(j+1)))/n_avg
-    enddo
+    !do j = 0,(n_blocks-1)
+    !  Avg(j+1) = sum(A(n_avg*j+1:n_avg*(j+1)))/n_avg
+    !enddo
+    Avg = block_avg(A)
   
     sigma_blocks_2 = sum((Avg - sum(Avg)/n_blocks)**2)/(n_blocks-1)
     std_err = sqrt(sigma_blocks_2/n_blocks)
+  end function
+
+  pure function block_avg(A)
+    ! calculates the block variance of the input measurement
+    real(dp), intent(in) :: A(:)
+    real(dp) :: block_avg(n_blocks)
+    integer :: j
+
+    do j = 0,(n_blocks-1)
+      block_avg(j+1) = sum(A(n_avg*j+1:n_avg*(j+1)))/n_avg
+    enddo
+
   end function
 end module

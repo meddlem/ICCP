@@ -6,8 +6,8 @@ module plotroutines
   public :: particle_plot, particle_plot_init, gnu_line_plot 
 
 contains
-  subroutine gnu_line_plot(x,y,xlabel,ylabel,title1,title,plot_no,y2)
-    real(dp), intent(in) :: x(:), y(:)
+  subroutine gnu_line_plot(x,y1,xlabel,ylabel,title1,title,plot_no,y2)
+    real(dp), intent(in) :: x(:), y1(:)
     real(dp), intent(in), optional :: y2(:)
     character(*), intent(in) :: xlabel, ylabel, title1, title
     integer, intent(in) :: plot_no
@@ -16,7 +16,7 @@ contains
     real(dp) :: xmin, xmax, xrange(2), ymin, ymax, yrange(2)
     
     if (present(y2)) then
-      if (size(y)/=size(y2)) then 
+      if (size(y1)/=size(y2)) then 
         print *, "error, arguments of gnu_line_plot must be same size"
         return
       endif
@@ -25,8 +25,8 @@ contains
     m = size(x)
     xmin = minval(x)
     xmax = maxval(x)
-    ymin = minval(y)
-    ymax = maxval(y)
+    ymin = minval(y1)
+    ymax = maxval(y1)
     xrange = [0._dp, xmax+(xmax-xmin)*0.1_dp]
     yrange = [ymin-(ymax-ymin)*0.1_dp, ymax+(ymax-ymin)*0.1_dp]
 
@@ -34,9 +34,9 @@ contains
     
     do i=1,m
       if (present(y2)) then
-        write(10,*) x(i),y(i),y2(i) ! write datapoints to file
+        write(10,*) x(i),y1(i),y2(i) ! write datapoints to file
       else
-        write(10,*) x(i),y(i) ! write datapoints to file
+        write(10,*) x(i),y1(i) ! write datapoints to file
       endif
     enddo
     
@@ -46,14 +46,14 @@ contains
     write(filename,'(A,I1,A)') 'set output "plot',plot_no,'.png"'
     open(10,access = 'sequential',file = 'gplot.txt')
     ! write(10,*) 'set output "plot.eps"'
-    write(10,*) 'set term png font "Fira Mono" 13'
+    write(10,*) 'set term pngcairo size 640,480 enhanced font "Verdana,10"'
     write(10,*) filename
     write(10,*) &
       'set style line 11 lt 1 lc rgbcolor "#000000" lw 1 #black'
     write(10,*) &
-      'set style line 1 lt 1 lc rgbcolor "#ff0000" lw 2 #red'
+      'set style line 1 lt 1 lc rgbcolor "#ff0000" lw 1 #red'
     write(10,*) &
-      'set style line 2 lt 1 lc rgbcolor "#0000ff" lw 2 #blue'
+      'set style line 2 lt 1 lc rgbcolor "#0000ff" lw 1 #blue'
     write(10,*) 'set border 3 #black'
     write(10,*) 'set xtics nomirror'
     write(10,*) 'set ytics nomirror'
