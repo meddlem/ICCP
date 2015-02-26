@@ -19,18 +19,26 @@ program main
   ! U: (..) pot. energy at (..)
   ! virial: (..) virial at (..)
   ! cvv: (..) velocity correlation coefficient at (..)
-  ! eq_pres: pressure in equilibrium, 
+  ! x_axis, t_axis: used for plot and correlation function
+  ! r_2: mean squared displacement from start of measurement
   ! nbrs_list: array containing a list of neighbor pairs
-  ! n_nbrs: total number pairs in nbrs_list 
+  ! fold_count: array with number of coord shifts for each particle
+  ! eq_pres: pressure in equilibrium 
+  ! eq_U pot energy per particle during measurement (avg)
+  ! Cv: specific heat per particle, at constant volume
   ! g: radial distribution function
+  ! L: side of volume 
+  ! rho: number density
+  ! D: diffusion constant 
+  ! T_init: initial temp set by user
+  ! n_nbrs: total number pairs in nbrs_list 
   ! bin: bin containing pair seperations
-  ! D: diffusion constant times 6t 
   ! start, end_time, runtime: record length of simulation
   real(dp), allocatable :: r(:,:), r_0(:,:), p(:,:), p_0(:,:), F(:,:), T(:), &
     E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), r_2(:)
   integer, allocatable :: nbrs_list(:,:), fold_count(:,:)
   real(dp) :: eq_pres, err_p, eq_U, err_U, err_Cv, Cv, g(n_bins), L, &
-    rho, D, err_D, T_init, T_tmp, mean_T, err_T 
+    rho, D, err_D, T_init, T_tmp, mean_T, err_T, testvec(n_meas)
   integer :: i, j, start_time, end_time, runtime, n_nbrs, bin(n_bins), &
     tmp_bin(n_bins) 
   
@@ -79,8 +87,8 @@ program main
 
     if (i >= m_start) then
       if (i == m_start) then
-        p_0 = p; r_0 = r 
-        fold_count = 0
+        p_0 = p; r_0 = r ! initialize measurement vars
+        fold_count = 0 ! reset
       endif
       
       j = i + 1 - m_start
@@ -111,7 +119,9 @@ program main
   call results_out(runtime, eq_pres, err_p, Cv, err_Cv, mean_T, err_T, eq_U, &
     err_U, D, err_D)
 
+  testvec = 6._dp*D*dt*(/(i,i=0, n_meas-1)/)
+
   ! generate final plots
-  call gnu_line_plot(t_axis,r_2,"time","<r^2>","","",1)
+  call gnu_line_plot(t_axis,r_2,"time","<r^2>","","",1,testvec)
   call gnu_line_plot(x_axis,g,"r","g","","",2)
 end program main 

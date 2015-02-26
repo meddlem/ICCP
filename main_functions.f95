@@ -91,16 +91,17 @@ contains
     real(dp), intent(out) :: Cv, err_Cv
     logical, intent(in) :: rescale_T
     real(dp), intent(in) :: E(:), T(:)
-    real(dp) :: sigma_E_2, mean_T, err_T, sigma_T_2
+    real(dp) :: sigma_E_2, mean_T, err_T, sigma_T_2, mu_E_4
     
     call mean_temp(mean_T,err_T,T)
       
     if (rescale_T .eqv. .true.) then
       ! calculate heat capacity, NVT ensemble 
-      sigma_E_2 = sum((E-sum(E)/m)**2)/m
+      sigma_E_2 = sum((E-sum(E)/m)**2)/m ! 2nd moment
+      mu_E_4 = sum((E-sum(E)/m)**4)/m ! 4th moment 
       
       Cv = 1._dp/(N*mean_T**2)*sigma_E_2
-      err_Cv = 1._dp/(N*mean_T**2)*std_err((E-sum(E)/m)**2)
+      err_Cv = 1._dp/(N*mean_T**2)*sqrt((mu_E_4-sigma_E_2**2)/(m**2))
     else 
       ! in NVE ensemble we use the lebowitz formula instead
       sigma_T_2 = sum((T-mean_T)**2)/m

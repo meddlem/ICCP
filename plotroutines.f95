@@ -6,13 +6,21 @@ module plotroutines
   public :: particle_plot, particle_plot_init, gnu_line_plot 
 
 contains
-  subroutine gnu_line_plot(x,y,xlabel,ylabel,title1,title,plot_no)
+  subroutine gnu_line_plot(x,y,xlabel,ylabel,title1,title,plot_no,y2)
     real(dp), intent(in) :: x(:), y(:)
+    real(dp), intent(in), optional :: y2(:)
     character(*), intent(in) :: xlabel, ylabel, title1, title
     integer, intent(in) :: plot_no
     character(1024) :: filename
     integer :: i, ret, m
     real(dp) :: xmin, xmax, xrange(2), ymin, ymax, yrange(2)
+    
+    if (present(y2)) then
+      if (size(y)/=size(y2)) then 
+        print *, "error, arguments of gnu_line_plot must be same size"
+        return
+      endif
+    endif
     
     m = size(x)
     xmin = minval(x)
@@ -23,9 +31,15 @@ contains
     yrange = [ymin-(ymax-ymin)*0.1_dp, ymax+(ymax-ymin)*0.1_dp]
 
     open(10,access = 'sequential',file = 'xydata.dat')
+    
     do i=1,m
-      write(10,*) x(i),y(i) ! write datapoints to file
+      if (present(y2)) then
+        write(10,*) x(i),y(i),y2(i) ! write datapoints to file
+      else
+        write(10,*) x(i),y(i) ! write datapoints to file
+      endif
     enddo
+    
     close(10,status = 'keep')
     
     ! create gnuplot command file
@@ -38,6 +52,8 @@ contains
       'set style line 11 lt 1 lc rgbcolor "#000000" lw 1 #black'
     write(10,*) &
       'set style line 1 lt 1 lc rgbcolor "#ff0000" lw 2 #red'
+    write(10,*) &
+      'set style line 2 lt 1 lc rgbcolor "#0000ff" lw 2 #blue'
     write(10,*) 'set border 3 #black'
     write(10,*) 'set xtics nomirror'
     write(10,*) 'set ytics nomirror'
@@ -48,9 +64,13 @@ contains
     write(10,*) 'set xlabel '//'"'//TRIM(xlabel)//'"'
     write(10,*) 'set ylabel '//'"'//TRIM(ylabel)//'"'
     if (m>0) then
-    write(10,*) 'plot "xydata.dat" using 1:2 with line ls 10 t "", \'
-    write(10,*) &
-    ' "xydata.dat" using 1:2 with line ls 1 t "'//TRIM(title1)//'", \'
+      write(10,*) 'plot "xydata.dat" using 1:2 with line ls 10 t "", \'
+      write(10,*) &
+      ' "xydata.dat" using 1:2 with line ls 1 t "'//TRIM(title1)//'", \'
+      if (present(y2)) then
+        write(10,*) &
+        ' "xydata.dat" using 1:3 with line ls 2 t "'//TRIM(title1)//'"'
+      endif
     endif
     close(10,status = 'keep')
 

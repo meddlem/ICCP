@@ -30,8 +30,11 @@ contains
       dr = r(i,:) - r(j,:) 
       dr = dr - nint(dr/L,kind=lng)*L ! implement PBC
       d = sqrt(sum(dr**2)) 
-
-      if (d<rc) then ! only particle pairs with d<rc contribute to E, F
+  
+      if (d>(sqrt(3._dp)*L)) then !check
+        print *, "warning: reduce dt", d
+        stop
+      elseif (d<rc) then ! only particle pairs with d<rc contribute to E, F
         FMAT(i,j,:) = 48._dp*dr*(1._dp/(d**14)-0.5_dp/(d**8))
         f_dot_dr(i,j) = 48._dp*(1._dp/(d**12)-0.5_dp/(d**6))
         VMAT(i,j) = 4._dp*(1._dp/(d**12)-1._dp/(d**6))
@@ -68,10 +71,7 @@ contains
         dr = dr - nint(dr/L,kind=lng)*L
         d = sqrt(sum(dr**2))
         
-        if (d>(sqrt(3._dp)*L)) then !check
-          print *, "warning: reduce dt", d
-          stop
-        elseif (d<rm) then
+        if (d<rm) then
           k = k+1
           nbrs_list(k,:) = [i, j]
           bin(nint(n_bins*d/rm + 0.5_dp)) = bin(nint(n_bins*d/rm + 0.5_dp)) + 1
