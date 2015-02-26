@@ -23,7 +23,6 @@ contains
     endif
     
     m = size(x)
-    
     xmin = minval(x)
     xmax = maxval(x)
     ymin = minval(y1)

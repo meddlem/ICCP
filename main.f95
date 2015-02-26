@@ -34,11 +34,12 @@ program main
   ! n_nbrs: total number pairs in nbrs_list 
   ! bin: bin containing pair seperations
   ! start, end_time, runtime: record length of simulation
+
   real(dp), allocatable :: r(:,:), r_0(:,:), p(:,:), p_0(:,:), F(:,:), T(:), &
     E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), r_2(:)
   integer, allocatable :: nbrs_list(:,:), fold_count(:,:)
   real(dp) :: eq_pres, err_p, eq_U, err_U, err_Cv, Cv, g(n_bins), L, &
-    rho, D, err_D, T_init, T_tmp, mean_T, err_T, linear_ap(n_meas)
+    rho, D, err_D, T_init, T_tmp, mean_T, err_T, r_sq_slope(n_meas)
   integer :: i, j, start_time, end_time, runtime, n_nbrs, bin(n_bins), &
     tmp_bin(n_bins) 
   
@@ -120,7 +121,7 @@ program main
     err_T, eq_U, err_U, D, err_D)
   
   ! generate final plots
-  linear_ap = 6._dp*D*dt*(/(i,i=0, n_meas-1)/)
-  call gnu_line_plot(t_axis,r_2,"time","<r^2>","","",1,linear_ap)
+  r_sq_slope = 6._dp*D*dt*(/(i,i=0, n_meas-1)/)
+  call gnu_line_plot(t_axis,r_2,"time","<r^2>","","",1,r_sq_slope)
   call gnu_line_plot(x_axis,g,"r","g","","",2)
 end program main 

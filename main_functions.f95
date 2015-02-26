@@ -91,22 +91,25 @@ contains
     real(dp), intent(out) :: Cv, err_Cv
     logical, intent(in) :: rescale_T
     real(dp), intent(in) :: E(:), T(:)
-    real(dp) :: sigma_E_2, mean_T, err_T, sigma_T_2
+    real(dp) :: mu_E, mu_E_2, mu_E_4, mean_T, err_T, mu_T_2, mu_T_4
     
     call mean_temp(mean_T,err_T,T)
       
     if (rescale_T .eqv. .true.) then
       ! calculate heat capacity per particle, NVT ensemble 
-      sigma_E_2 = sum((E-sum(E)/m)**2)/m ! 2nd moment
-      
-      Cv = 1._dp/(N*mean_T**2)*sigma_E_2
-      err_Cv = 1._dp/(N*mean_T**2)*sqrt(sum(block_avg(E-sum(E)/m)**4)/n_blocks**2)
-    else 
-      ! in NVE ensemble we use the lebowitz formula instead
-      sigma_T_2 = sum((T-mean_T)**2)/m
+      mu_E = sum(E)/m ! 1st moment
+      mu_E_2 = sum((E-mu_E)**2)/m ! 2nd moment
+      mu_E_4 = sum(block_avg(E-mu_E)**4)/n_blocks**2 
 
-      Cv = 1._dp/(3._dp/2._dp - sigma_T_2/mean_T**2)
-      err_Cv = sqrt(sum(block_avg(T-mean_T)**4)/n_blocks**2)
+      Cv = 1._dp/(N*mean_T**2)*mu_E_2
+      err_Cv = 1._dp/(N*mean_T**2)*sqrt(mu_E_4)
+    else 
+      ! in NVE ensemble use the lebowitz formula instead
+      mu_T_2 = sum((T-mean_T)**2)/m
+      mu_T_4 = sum(block_avg(T-mean_T)**4)/n_blocks**2
+
+      Cv = 1._dp/(3._dp/2._dp - mu_T_2/(mean_T**2))
+      err_Cv = sqrt(mu_T_4) ! this is incorrect.. 
     endif
   end subroutine
 
@@ -149,7 +152,7 @@ contains
   end subroutine
   
   pure function std_err(A)
-    ! calculates the block variance of the input measurement
+    ! calculates std error of A from blocked data
     real(dp), intent(in) :: A(:)
     real(dp) :: std_err, sigma_blocks_2, Avg(n_blocks)
 
@@ -160,7 +163,7 @@ contains
   end function
 
   pure function block_avg(A)
-    ! calculates the block variance of the input measurement
+    ! returns array containing block average of A
     real(dp), intent(in) :: A(:)
     real(dp) :: block_avg(n_blocks)
     integer :: j
