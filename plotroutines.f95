@@ -80,9 +80,9 @@ contains
     close(10,status = 'keep')
 
     ! now call gnuplot and plot the curves
-    ret = system('gnuplot gplot.txt')
-    ret = system('rm gplot.txt')
-    ret = system('rm xydata.dat')
+    call system('gnuplot gplot.txt',ret)
+    call system('rm gplot.txt',ret)
+    call system('rm xydata.dat',ret)
   end subroutine 
 
   subroutine particle_plot_init(xmin,xmax)

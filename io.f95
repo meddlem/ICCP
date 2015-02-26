@@ -21,7 +21,6 @@ contains
     real(dp), intent(in) :: rho, T_init, eq_pres, err_p, heat_cap, err_heat, &
       mean_T, err_T, eq_U, err_U, D, err_D
     integer, intent(in) :: runtime
-    integer :: ret
 
     open(10,access = 'sequential',file = 'output.txt')
     
@@ -40,7 +39,7 @@ contains
     
     close(10,status = 'keep')
     
-    ret = system('cat output.txt')
+    call system('cat output.txt')
   end subroutine
 
   subroutine f_check(p)
