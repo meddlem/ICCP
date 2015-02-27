@@ -171,6 +171,5 @@ contains
     do j = 0,(n_blocks-1)
       block_avg(j+1) = sum(A(n_avg*j+1:n_avg*(j+1)))/n_avg
     enddo
-
   end function
 end module

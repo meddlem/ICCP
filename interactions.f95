@@ -53,7 +53,7 @@ contains
     deallocate(FMAT,VMAT,f_dot_dr)
   end subroutine
 
-  pure subroutine make_nbrs_list(nbrs_list, n_nbrs, bin, r, L)
+  subroutine make_nbrs_list(nbrs_list, n_nbrs, bin, r, L)
     ! creates a list of all particles j within distance rm of particle i
     integer, intent(out) :: nbrs_list(:,:), n_nbrs, bin(:)
     real(dp), intent(in) :: r(:,:), L
@@ -64,13 +64,15 @@ contains
     nbrs_list = 0
     k = 0
     bin = 0 
-
+    
+    !$omp parallel do ordered private(d,dr)
     do i = 1,N
       do j = i+1,N
         dr = r(i,:) - r(j,:)
         dr = dr - nint(dr/L,kind=lng)*L
         d = sqrt(sum(dr**2))
-        
+
+        !$omp ordered
         if (d<rm) then
           k = k+1
           nbrs_list(k,:) = [i, j]
@@ -78,8 +80,10 @@ contains
           m = nint(n_bins*d/rm + 0.5_dp)
           bin(m) = bin(m) + 1
         endif
+        !$omp end ordered
       enddo
     enddo
+    !$omp end parallel do
 
     n_nbrs = k !get total # of nn pairs
   end subroutine

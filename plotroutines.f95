@@ -6,10 +6,11 @@ module plotroutines
   public :: particle_plot, particle_plot_init, gnu_line_plot 
 
 contains
-  subroutine gnu_line_plot(x,y1,xlabel,ylabel,title1,title,plot_no,y2)
+  subroutine gnu_line_plot(x,y1,xlabel,ylabel,label1,title,plot_no,y2,label2)
     real(dp), intent(in) :: x(:), y1(:)
     real(dp), intent(in), optional :: y2(:)
-    character(*), intent(in) :: xlabel, ylabel, title1, title
+    character(*), intent(in) :: xlabel, ylabel, label1, title
+    character(*), intent(in), optional :: label2
     integer, intent(in) :: plot_no
     character(1024) :: filename
     integer :: i, ret, m
@@ -44,24 +45,36 @@ contains
     close(10,status = 'keep')
     
     ! create gnuplot command file
-    write(filename,'(A,I1,A)') 'set output "plot',plot_no,'.png"'
-    open(10,access = 'sequential',file = 'gplot.txt')
+    write(filename,'(A,I1,A)') 'set output "plot',plot_no,'.eps"'
     
-    ! write(10,*) 'set output "plot.eps"'
-    write(10,*) 'set term pngcairo size 640,480 enhanced font "Verdana,10"'
+    open(10,access = 'sequential',file = 'gplot.txt')
+    ! write(10,*) 'set term pngcairo size 640,480 enhanced font "Verdana,10"'
+    write(10,*) 'set term epscairo size 13cm,8cm font "Verdana,15"'
     write(10,*) filename
+    
+    ! set line color definitions
     write(10,*) &
-      'set style line 11 lt 1 lc rgbcolor "#000000" lw 1 #black'
+      'set style line 1 lt 1 lc rgb "#ff0000" lw 2 #red'
     write(10,*) &
-      'set style line 1 lt 1 lc rgbcolor "#ff0000" lw 1 #red'
-    write(10,*) &
-      'set style line 2 lt 1 lc rgbcolor "#0000ff" lw 1 #blue'
-    write(10,*) 'set border 3 #black'
-    write(10,*) 'set xtics nomirror'
-    write(10,*) 'set ytics nomirror'
+      'set style line 2 lt 1 lc rgb "#0000ff" lw 2 #blue'
+    
+    ! axes 
+    write(10,*) 'set style line 11 lc rgb "#808080" lt 1'
+    write(10,*) 'set border 3 back ls 11'
+    write(10,*) 'set tics nomirror scale 0.75'
+    write(10,*) 'set key right center'
+    write(10,*) 'set mxtics 2'
+    write(10,*) 'set mytics 2'
+    
+    ! grid 
+    write(10,*) 'set style line 12 lc rgb "#808080" lt 0 lw 1'
+    write(10,*) 'set grid back ls 12'
+    
+    ! plotrange
     write(10,*) 'set xrange [',xrange(1),':',xrange(2),']'
     write(10,*) 'set yrange [',yrange(1),':',yrange(2),']'
-    write(10,*) 'set key right center'
+    
+    ! plot labels
     write(10,*) 'set title "'//TRIM(title)//'"'
     write(10,*) 'set xlabel '//'"'//TRIM(xlabel)//'"'
     write(10,*) 'set ylabel '//'"'//TRIM(ylabel)//'"'
@@ -69,10 +82,10 @@ contains
     if (m>0) then
       write(10,*) 'plot "xydata.dat" using 1:2 with line ls 10 t "", \'
       write(10,*) &
-      ' "xydata.dat" using 1:2 with line ls 1 t "'//TRIM(title1)//'", \'
+      ' "xydata.dat" using 1:2 with line ls 1 t "'//TRIM(label1)//'", \'
       if (present(y2)) then
         write(10,*) &
-        ' "xydata.dat" using 1:3 with line ls 2 t "'//TRIM(title1)//'"'
+        ' "xydata.dat" using 1:3 with line ls 2 t "'//TRIM(label2)//'"'
       endif
     endif
     
