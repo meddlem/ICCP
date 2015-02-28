@@ -72,15 +72,15 @@ contains
         dr = dr - nint(dr/L,kind=lng)*L
         d = sqrt(sum(dr**2))
 
-        !$omp ordered
         if (d<rm) then
+          !$omp ordered
           k = k+1
           nbrs_list(k,:) = [i, j]
+          !$omp end ordered
 
           m = nint(n_bins*d/rm + 0.5_dp)
           bin(m) = bin(m) + 1
         endif
-        !$omp end ordered
       enddo
     enddo
     !$omp end parallel do

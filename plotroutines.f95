@@ -16,9 +16,11 @@ contains
     integer :: i, ret, m
     real(dp) :: xmin, xmax, xrange(2), ymin, ymax, yrange(2)
     
+    if (size(y1)/=size(x)) print *, "error, arguments must be same size"
+    
     if (present(y2)) then
       if (size(y1)/=size(y2)) then 
-        print *, "error, arguments of gnu_line_plot must be same size"
+        print *, "error, arguments must be same size"
         return
       endif
     endif
@@ -46,18 +48,17 @@ contains
     
     ! create gnuplot command file
     write(filename,'(A,I1,A)') 'set output "plot',plot_no,'.eps"'
-    
     open(10,access = 'sequential',file = 'gplot.txt')
+    
+    ! set output terminal  
     ! write(10,*) 'set term pngcairo size 640,480 enhanced font "Verdana,10"'
     write(10,*) 'set term epscairo size 13cm,8cm font "Verdana,15"'
     write(10,*) filename
-    
     ! set line color definitions
     write(10,*) &
       'set style line 1 lt 1 lc rgb "#ff0000" lw 2 #red'
     write(10,*) &
       'set style line 2 lt 1 lc rgb "#0000ff" lw 2 #blue'
-    
     ! axes 
     write(10,*) 'set style line 11 lc rgb "#808080" lt 1'
     write(10,*) 'set border 3 back ls 11'
@@ -65,15 +66,12 @@ contains
     write(10,*) 'set key right center'
     write(10,*) 'set mxtics 2'
     write(10,*) 'set mytics 2'
-    
     ! grid 
     write(10,*) 'set style line 12 lc rgb "#808080" lt 0 lw 1'
     write(10,*) 'set grid back ls 12'
-    
     ! plotrange
     write(10,*) 'set xrange [',xrange(1),':',xrange(2),']'
     write(10,*) 'set yrange [',yrange(1),':',yrange(2),']'
-    
     ! plot labels
     write(10,*) 'set title "'//TRIM(title)//'"'
     write(10,*) 'set xlabel '//'"'//TRIM(xlabel)//'"'

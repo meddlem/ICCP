@@ -39,7 +39,7 @@ program main
     E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), r_2(:)
   integer, allocatable :: nbrs_list(:,:), fold_count(:,:)
   real(dp) :: eq_pres, err_p, eq_U, err_U, err_Cv, Cv, g(n_bins), L, &
-    rho, D, err_D, T_init, T_tmp, mean_T, err_T, r_sq_slope(n_meas)
+    rho, D, err_D, T_init, T_tmp, mean_T, err_T, r_2_fit(n_meas), offset
   integer :: i, j, start_time, end_time, runtime, n_nbrs, bin(n_bins), &
     tmp_bin(n_bins) 
   
@@ -108,7 +108,7 @@ program main
   runtime = (end_time - start_time)/1000
   call radial_df(g,bin,rho) 
   call mean_temp(mean_T,err_T,T)
-  call diff_const(D,err_D,r_2,t_axis) ! calc D using linear regression fit
+  call diff_const(D,err_D,offset,r_2,t_axis) ! calc D using linear regression fit
   call heat_cap(Cv,err_Cv,E,T,rescale_T)
   call pressure(eq_pres,err_p,virial,mean_T,rho)  
   call pot_energy(eq_U,err_U,U)
@@ -121,7 +121,7 @@ program main
     err_T, eq_U, err_U, D, err_D)
   
   ! generate final plots
-  r_sq_slope = 6._dp*D*dt*(/(i,i=0, n_meas-1)/)
-  call gnu_line_plot(t_axis,r_2,"t","<r^2>","measurement","",1,r_sq_slope,"fit")
+  r_2_fit = 6._dp*D*dt*(/(i,i=0, n_meas-1)/) + offset
+  call gnu_line_plot(t_axis,r_2,"t","<r^2>","measurement","",1,r_2_fit,"fit")
   call gnu_line_plot(x_axis,g,"r","g(r)","","",2)
 end program main 

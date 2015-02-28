@@ -1,0 +1,17 @@
+
+*********** Summary ***********
+
+Number density :          0.8800
+Initial temperature :     1.0950
+
+*********** Output ************
+
+Runtime :    171 s
+Equilibrium pressure :    3.4148 ± 0.0122
+Heat capacity :           2.3409 ± 0.0500
+Simulation temperature :  1.0974 ± 0.0013
+Potential energy :       -5.8616 ± 0.0021
+Diffusion constant :      0.0468 ± 0.0000
+
+*******************************
+

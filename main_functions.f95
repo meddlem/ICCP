@@ -121,8 +121,8 @@ contains
     err_U = std_err(U/N)
   end subroutine
   
-  pure subroutine diff_const(D, err_D, r_2, t)
-    real(dp), intent(out) :: D, err_D
+  pure subroutine diff_const(D, err_D, offset, r_2, t)
+    real(dp), intent(out) :: D, err_D, offset
     real(dp), intent(in) :: r_2(:), t(:)
     real(dp) :: slope, mu_t, mu_r_2, ss_rr, ss_tt, ss_rt, s
     ! calculate diffusion constant from slope of <r^2>, using linear regression
@@ -136,6 +136,7 @@ contains
     ss_rt = sum((t - mu_t)*(r_2 - mu_r_2))
     
     slope = ss_rt/ss_tt
+    offset = mu_r_2 - slope*mu_t
     s = sqrt((ss_rr - slope*ss_rt)/(m-2))
 
     D = slope/6._dp 

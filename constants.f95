@@ -27,7 +27,7 @@ module constants
   real(dp), parameter :: rm = 3.3_dp
   real(dp), parameter :: pi = 4._dp*atan(1._dp) 
   
-  integer, parameter :: steps = 10000
+  integer, parameter :: steps = 20000
   integer, parameter :: N = 6**3*4
   integer, parameter :: n_bins = 120
   integer, parameter :: up_nbrs_list = 25
