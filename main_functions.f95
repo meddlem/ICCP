@@ -67,7 +67,7 @@ contains
 
     n_s = n_meas/up_nbrs_list ! number of timesteps where we binned distances
     delta_r = rm/n_bins ! bin size
-    rs = rm*(/(i,i=0,n_bins-1)/)/(n_bins)   
+    rs = delta_r*((/(i,i=0,n_bins-1)/)+0.5_dp)   
 
     g = 2._dp/(rho*n_s*(N-1))*real(bin,kind=dp)/(4._dp*pi*delta_r*rs**2)
   end subroutine 

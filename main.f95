@@ -124,4 +124,5 @@ program main
   r_2_fit = 6._dp*D*dt*(/(i,i=0, n_meas-1)/) + offset
   call gnu_line_plot(t_axis,r_2,"t","<r^2>","measurement","",1,r_2_fit,"fit")
   call gnu_line_plot(x_axis,g,"r","g(r)","","",2)
+  call gnu_line_plot(t_axis,cvv,"t","Cvv","","",3)
 end program main 
