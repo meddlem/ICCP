@@ -31,4 +31,4 @@ main: $(OBJS)
 .PHONY: clean
 clean:
 	$(RM) $(PROG) $(OBJS) *.mod
-	$(RM) plot*.eps output.txt
+	$(RM) plot*.png output.txt

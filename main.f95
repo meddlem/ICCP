@@ -38,8 +38,9 @@ program main
   real(dp), allocatable :: r(:,:), r_0(:,:), p(:,:), p_0(:,:), F(:,:), T(:), &
     E(:), U(:), virial(:), cvv(:), x_axis(:), t_axis(:), r_2(:)
   integer, allocatable :: nbrs_list(:,:), fold_count(:,:)
-  real(dp) :: eq_pres, err_p, eq_U, err_U, err_Cv, Cv, g(n_bins), L, &
-    rho, D, err_D, T_init, T_tmp, mean_T, err_T, r_2_fit(n_meas), offset
+  real(dp) :: eq_pres, err_p, virial_tmp, eq_U, U_tmp, err_U, err_Cv, Cv, &
+    g(n_bins), L, rho, D, err_D, T_init, T_tmp, mean_T, err_T, &
+    r_2_fit(n_meas), offset
   integer :: i, j, start_time, end_time, runtime, n_nbrs, bin(n_bins), &
     tmp_bin(n_bins) 
   
@@ -81,7 +82,7 @@ program main
     r = r + p*dt + 0.5_dp*F*(dt**2) ! update positions
     call fold(r,fold_count,L) ! enforce PBC
     p = p + 0.5_dp*F*dt ! update momentum (1/2)
-    call force(F,U(j),virial(j),r,rho,L,nbrs_list,n_nbrs) ! update force
+    call force(F,U_tmp,virial_tmp,r,rho,L,nbrs_list,n_nbrs) ! update force
     p = p + 0.5_dp*F*dt ! update momentum (2/2)
 
     T_tmp = meas_T(p)
@@ -93,8 +94,8 @@ program main
       endif
       
       j = i + 1 - m_start
-      call measure(E(j),U(j),r_2(j),cvv(j),p,p_0,r,r_0,T_tmp,fold_count,L)
-      T(j) = T_tmp
+      call measure(E(j),U_tmp,r_2(j),cvv(j),p,p_0,r,r_0,T_tmp,fold_count,L)
+      T(j) = T_tmp; virial(j) = virial_tmp; U(j) = U_tmp
     endif
     
     if ((rescale_T .eqv. .true.).or.(i < m_start)) call rescale(p,T_tmp,T_init)
@@ -108,7 +109,7 @@ program main
   runtime = (end_time - start_time)/1000
   call radial_df(g,bin,rho) 
   call mean_temp(mean_T,err_T,T)
-  call diff_const(D,err_D,offset,r_2,t_axis) ! calc D using linear regression fit
+  call diff_const(D,err_D,offset,r_2,t_axis) ! calc D using linear regression 
   call heat_cap(Cv,err_Cv,E,T,rescale_T)
   call pressure(eq_pres,err_p,virial,mean_T,rho)  
   call pot_energy(eq_U,err_U,U)
@@ -124,5 +125,5 @@ program main
   r_2_fit = 6._dp*D*dt*(/(i,i=0, n_meas-1)/) + offset
   call gnu_line_plot(t_axis,r_2,"t","<r^2>","measurement","",1,r_2_fit,"fit")
   call gnu_line_plot(x_axis,g,"r","g(r)","","",2)
-  call gnu_line_plot(t_axis,cvv,"t","Cvv","","",3)
+  call gnu_line_plot(t_axis,E,"t","E","","",3)
 end program main 

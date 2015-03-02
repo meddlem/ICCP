@@ -47,12 +47,12 @@ contains
     close(10,status = 'keep')
     
     ! create gnuplot command file
-    write(filename,'(A,I1,A)') 'set output "plot',plot_no,'.eps"'
+    write(filename,'(A,I1,A)') 'set output "plot',plot_no,'.png"'
     open(10,access = 'sequential',file = 'gplot.txt')
     
     ! set output terminal  
-    ! write(10,*) 'set term pngcairo size 640,480 enhanced font "Verdana,10"'
-    write(10,*) 'set term epscairo size 13cm,9cm font "Verdana,15"'
+    write(10,*) 'set term pngcairo size 640,480 enhanced font "Verdana,10"'
+    ! write(10,*) 'set term epscairo size 13cm,9cm font "Verdana,15"'
     write(10,*) filename
     ! set line color definitions
     write(10,*) &
@@ -61,7 +61,6 @@ contains
       'set style line 2 lt 1 lc rgb "#0000ff" lw 2 #blue'
     ! axes 
     write(10,*) 'set style line 11 lc rgb "#808080" lt 1'
-    ! write(10,*) 'set border 3 back ls 11'
     write(10,*) 'set border 31 back ls 11'
     write(10,*) 'set tics nomirror scale 0.75'
     write(10,*) 'set key right center'

@@ -1,6 +1,7 @@
 # MD 
 This program is a Molecular Dynamics simulation, of an Argon gas in the NVT 
 ensemble, based on the Velocity Verlet algorithm. 
+Requires: gnuplot, plplot
 
 Program structure:
 - constants: contains all constants used througout the simulation + definitions

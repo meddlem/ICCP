@@ -17,6 +17,7 @@ module constants
   ! n_meas: total number of measurements
   ! n_blocks: number of data blocks for computing error
   ! prtplt: determines if particle positions are plotted during iteration
+  ! rescalte_T: determines if temp is rescaled after equilibriation
 
   ! NOTE: IF YOU MAKE ANY CHANGES HERE RECOMPILE ALL MODULES: "make -B" 
   integer, parameter :: dp = selected_real_kind(15,307)
@@ -27,11 +28,11 @@ module constants
   real(dp), parameter :: rm = 3.3_dp
   real(dp), parameter :: pi = 4._dp*atan(1._dp) 
   
-  integer, parameter :: steps = 40000
+  integer, parameter :: steps = 30000
   integer, parameter :: N = 6**3*4
   integer, parameter :: n_bins = 120
   integer, parameter :: up_nbrs_list = 25
-  integer, parameter :: m_start = 5000
+  integer, parameter :: m_start = 10000
   integer, parameter :: n_avg = 128 
   integer, parameter :: n_meas = steps + 1 - m_start
   integer, parameter :: n_blocks = n_meas/n_avg

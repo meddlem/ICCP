@@ -30,12 +30,13 @@ contains
   end function
 
   pure subroutine rescale(p, T, T_tgt)
-    ! rescales momentum to keep temperature fixed, method by berendsen et al.
+    ! rescales momentum to keep temperature fixed, berendsen thermostat
     real(dp), intent(inout) :: p(:,:)
     real(dp), intent(in) :: T_tgt, T
     real(dp) :: lambda
 
     lambda = sqrt(1._dp + 0.0025_dp*(T_tgt/T-1._dp))
+    ! lambda = sqrt(T_tgt/T)
     p = p*lambda
   end subroutine  
 
@@ -91,7 +92,8 @@ contains
     real(dp), intent(out) :: Cv, err_Cv
     logical, intent(in) :: rescale_T
     real(dp), intent(in) :: E(:), T(:)
-    real(dp) :: mu_E, mu_E_2, mu_E_4, mean_T, err_T, mu_T_2, mu_T_4
+    real(dp) :: mu_E, mu_E_2, mu_E_4, mean_T, err_T, mu_T_2, &
+      mu_T_2_b(n_blocks), Cv_b(n_blocks)
     
     call mean_temp(mean_T,err_T,T)
       
@@ -101,15 +103,16 @@ contains
       mu_E_2 = sum((E-mu_E)**2)/m ! 2nd moment
       mu_E_4 = sum(block_avg(E-mu_E)**4)/n_blocks**2 
 
-      Cv = 1._dp/(N*mean_T**2)*mu_E_2
-      err_Cv = 1._dp/(N*mean_T**2)*sqrt(mu_E_4)
+      Cv = mu_E_2/(N*mean_T**2)
+      err_Cv = sqrt(mu_E_4)/(N*mean_T**2)
     else 
       ! in NVE ensemble use the lebowitz formula instead
       mu_T_2 = sum((T-mean_T)**2)/m
-      mu_T_4 = sum(block_avg(T-mean_T)**4)/n_blocks**2
+      mu_T_2_b = block_avg((T-mean_T)**2) 
 
-      Cv = 1._dp/(3._dp/2._dp - mu_T_2/(mean_T**2))
-      err_Cv = sqrt(mu_T_4) ! this is incorrect.. 
+      Cv = 1._dp/(2._dp/3._dp - N*mu_T_2/(mean_T**2))
+      Cv_b = 1._dp/(2._dp/3._dp - N*mu_T_2_b/(mean_T**2)) ! block avg Cv
+      err_Cv = sqrt(sum((Cv_b-Cv)**2)/(n_blocks*(n_blocks-1)))
     endif
   end subroutine
 
